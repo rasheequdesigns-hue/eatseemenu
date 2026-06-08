@@ -98,6 +98,7 @@ export interface AuditLog {
 }
 
 export enum View {
+  STOREFRONT = 'STOREFRONT',
   CHAT = 'CHAT',
   ADMIN_LOGIN = 'ADMIN_LOGIN',
   ADMIN_DASHBOARD = 'ADMIN_DASHBOARD',

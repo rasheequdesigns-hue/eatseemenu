@@ -4,12 +4,13 @@ import { View } from './types';
 import ChatInterface from './components/ChatInterface';
 import AdminPanel from './components/AdminPanel';
 import Login from './components/Login';
+import Storefront from './components/Storefront';
 import { LiquidBackground } from './components/LiquidBackground';
 import { Settings } from 'lucide-react';
 import { mockDB } from './services/mockFirebase';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<View>(View.CHAT);
+  const [currentView, setCurrentView] = useState<View>(View.STOREFRONT);
 
   // Sync Global Settings (Title, Icon)
   useEffect(() => {
@@ -39,14 +40,16 @@ const App: React.FC = () => {
 
   const renderView = () => {
     switch (currentView) {
+      case View.STOREFRONT:
+        return <Storefront />;
       case View.CHAT:
         return <ChatInterface />;
       case View.ADMIN_LOGIN:
-        return <Login onLoginSuccess={() => setCurrentView(View.ADMIN_DASHBOARD)} onBack={() => setCurrentView(View.CHAT)} />;
+        return <Login onLoginSuccess={() => setCurrentView(View.ADMIN_DASHBOARD)} onBack={() => setCurrentView(View.STOREFRONT)} />;
       case View.ADMIN_DASHBOARD:
-        return <AdminPanel onLogout={() => setCurrentView(View.CHAT)} />;
+        return <AdminPanel onLogout={() => setCurrentView(View.STOREFRONT)} />;
       default:
-        return <ChatInterface />;
+        return <Storefront />;
     }
   };
 
@@ -59,7 +62,7 @@ const App: React.FC = () => {
         </div>
 
         {/* Admin Toggle - Floating Glass Button */}
-        {currentView === View.CHAT && (
+        {currentView === View.STOREFRONT && (
           <button 
             onClick={() => setCurrentView(View.ADMIN_LOGIN)}
             className="fixed bottom-6 right-6 z-50 glass rounded-full p-3 shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 group bg-white/10"
