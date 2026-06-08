@@ -442,7 +442,7 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                 setAdminProducts(DEFAULT_PRODUCTS);
                 localStorage.clear();
                 setShowResetConfirm(false);
-                triggerToast("Restored original Eatsee credentials and presets!");
+                triggerToast("Restored original credentials and presets!");
             };
 
             const exportConfig = () => {
@@ -1340,7 +1340,6 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                                             </div>
                                         )}
                                     </div>
-                                    <span className="text-[10px] text-slate-400 uppercase tracking-widest font-black mt-1">{company.tagline}</span>
                                 </div>
                                 
                                 {/* Center Circular Phone Logo Block */}
@@ -1356,13 +1355,13 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
 
                                 {/* Right Text Block */}
                                 <div className="text-center md:text-right text-slate-700 text-xs">
-                                    <p className="font-bold text-[#0c2d20] text-sm">{company.name} Food Products</p>
+                                    <p className="font-bold text-[#0c2d20] text-sm">Food Products</p>
                                     <p className="text-slate-500 font-medium">{company.address}</p>
                                 </div>
                             </div>
 
                             <div className="space-y-2 text-center text-xs text-emerald-300/60 mt-4">
-                                <p>© 2026 {company.name} Food Products. All rights reserved.</p>
+                                <p>© 2026 Food Products. All rights reserved.</p>
                                 <div className="flex items-center justify-center gap-2 text-[10px]">
                                     <span className="opacity-80">Design perfectly from "graphi.qo".</span>
                                     <span>•</span>
