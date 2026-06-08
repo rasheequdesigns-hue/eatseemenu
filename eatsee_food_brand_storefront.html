@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eatsee Food Products - Order via WhatsApp</title>
+    <title>Food Products - Order via WhatsApp</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for beautiful icons -->
@@ -496,21 +496,22 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                         <div className="max-w-6xl mx-auto flex items-center justify-between gap-2">
                             
                             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-                                <div className="bg-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-full flex items-center justify-center shadow max-h-10 sm:max-h-12 overflow-hidden gap-1.5 sm:gap-2">
+                                <div className="bg-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-full flex items-center justify-center shadow max-h-10 sm:max-h-12 overflow-hidden">
                                     {company.logoUrl ? (
                                         <img 
                                             src={company.logoUrl} 
                                             alt={company.name} 
-                                            className="h-5 sm:h-7 w-auto object-contain"
+                                            className="h-6 sm:h-8 w-auto object-contain"
                                             onError={(e) => {
                                                 e.target.onerror = null;
                                                 e.target.style.display = 'none';
                                             }}
                                         />
-                                    ) : null}
-                                    <span className="text-[#0c2d20] font-black text-lg sm:text-2xl tracking-tight flex items-center">
-                                        {company.name}
-                                    </span>
+                                    ) : (
+                                        <div className="bg-[#0c2d20] text-white rounded-full w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center font-black text-[10px] sm:text-xs">
+                                            {company.name.charAt(0)}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="hidden lg:block">
                                     <span className="text-[10px] text-emerald-400/80 block font-bold tracking-widest uppercase leading-none mb-0.5">{company.tagline}</span>
@@ -678,7 +679,7 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-emerald-900/80 pb-6 mb-6 gap-4">
                                     <div>
                                         <h2 className="text-2xl font-bold text-amber-400 flex items-center gap-2">
-                                            <i className="fa-solid fa-screwdriver-wrench"></i> Configure Eatsee Store
+                                            <i className="fa-solid fa-screwdriver-wrench"></i> Configure Store
                                         </h2>
                                         <p className="text-sm text-emerald-200/70 mt-1">Live updates of the logo, brand names, and menu card attributes.</p>
                                     </div>
@@ -1269,7 +1270,7 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                                 <div className="p-2">
                                     <img 
                                         src="image_82eb2b.jpg" 
-                                        alt="Eatsee Food Products Original Menu Flyer" 
+                                        alt="Food Products Original Menu Flyer" 
                                         className="w-full h-auto max-h-[80vh] rounded-lg object-contain bg-slate-950"
                                         onError={(e) => {
                                             e.target.onerror = null;
@@ -1278,7 +1279,7 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                                     />
                                 </div>
                                 <div className="bg-slate-950 py-3 px-4 text-center text-xs text-emerald-400 font-bold border-t border-slate-900">
-                                    Eatsee Original Print Menu & Pricing Guide
+                                    Original Print Menu & Pricing Guide
                                 </div>
                             </div>
                         </div>
@@ -1293,7 +1294,7 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                                 </div>
                                 <h3 className="text-xl font-bold text-white mb-2">Reset Configurations?</h3>
                                 <p className="text-sm text-slate-300 mb-6 leading-relaxed">
-                                    Are you sure you want to restore the original Eatsee brand settings? This will restore the 6 original items from image_82eb2b.jpg and clear your modifications.
+                                    Are you sure you want to restore the original brand settings? This will restore the 6 original items from image_82eb2b.jpg and clear your modifications.
                                 </p>
                                 <div className="flex gap-3 justify-center">
                                     <button 
@@ -1322,21 +1323,22 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                                 
                                 {/* Logo Left Section */}
                                 <div className="flex flex-col items-center md:items-start">
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center">
                                         {company.logoUrl ? (
                                             <img 
                                                 src={company.logoUrl} 
                                                 alt={company.name} 
-                                                className="h-9 w-auto object-contain"
+                                                className="h-12 w-auto object-contain"
                                                 onError={(e) => {
                                                     e.target.onerror = null;
                                                     e.target.style.display = 'none';
                                                 }}
                                             />
-                                        ) : null}
-                                        <span className="text-[#0c2d20] font-black text-4xl tracking-tight leading-none">
-                                            {company.name}
-                                        </span>
+                                        ) : (
+                                            <div className="bg-[#0c2d20] text-white rounded-full w-10 h-10 flex items-center justify-center font-black text-sm">
+                                                {company.name.charAt(0)}
+                                            </div>
+                                        )}
                                     </div>
                                     <span className="text-[10px] text-slate-400 uppercase tracking-widest font-black mt-1">{company.tagline}</span>
                                 </div>
@@ -1362,7 +1364,7 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                             <div className="space-y-2 text-center text-xs text-emerald-300/60 mt-4">
                                 <p>© 2026 {company.name} Food Products. All rights reserved.</p>
                                 <div className="flex items-center justify-center gap-2 text-[10px]">
-                                    <span className="opacity-80">Design replicated perfectly from "image_82eb2b.jpg".</span>
+                                    <span className="opacity-80">Design perfectly from "graphi.qo".</span>
                                     <span>•</span>
                                     <button 
                                         onClick={() => {
