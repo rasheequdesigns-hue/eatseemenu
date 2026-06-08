@@ -899,10 +899,10 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                                             value={editingProduct.nameEnglish}
                                             onChange={(e) => {
                                                 const val = e.target.value;
-                                                setEditingProduct({...editingProduct, nameEnglish: val});
+                                                setEditingProduct(prev => prev ? {...prev, nameEnglish: val} : null);
                                                 handleProductChange(editingProduct.id, "nameEnglish", val);
                                             }}
-                                            className="w-full bg-[#0c2d20] border border-emerald-900 rounded-lg px-3 py-2 text-white text-xs" 
+                                            className="w-full bg-[#0c2d20] border border-emerald-900 rounded-lg px-3 py-2 text-white text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none" 
                                         />
                                     </div>
                                     <div>
@@ -912,10 +912,10 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                                             value={editingProduct.nameMalayalam}
                                             onChange={(e) => {
                                                 const val = e.target.value;
-                                                setEditingProduct({...editingProduct, nameMalayalam: val});
+                                                setEditingProduct(prev => prev ? {...prev, nameMalayalam: val} : null);
                                                 handleProductChange(editingProduct.id, "nameMalayalam", val);
                                             }}
-                                            className="w-full bg-[#0c2d20] border border-emerald-900 rounded-lg px-3 py-2 text-white text-xs font-serif" 
+                                            className="w-full bg-[#0c2d20] border border-emerald-900 rounded-lg px-3 py-2 text-white text-xs font-serif focus:ring-1 focus:ring-emerald-500 focus:outline-none" 
                                         />
                                     </div>
                                     <div>
@@ -925,10 +925,10 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                                             value={editingProduct.price}
                                             onChange={(e) => {
                                                 const val = parseInt(e.target.value) || 0;
-                                                setEditingProduct({...editingProduct, price: val});
+                                                setEditingProduct(prev => prev ? {...prev, price: val} : null);
                                                 handleProductChange(editingProduct.id, "price", val);
                                             }}
-                                            className="w-full bg-[#0c2d20] border border-emerald-900 rounded-lg px-3 py-2 text-white text-xs" 
+                                            className="w-full bg-[#0c2d20] border border-emerald-900 rounded-lg px-3 py-2 text-white text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none" 
                                         />
                                     </div>
                                     <div>
@@ -939,11 +939,11 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                                                 value={editingProduct.imageUrl}
                                                 onChange={(e) => {
                                                     const val = e.target.value;
-                                                    setEditingProduct({...editingProduct, imageUrl: val});
+                                                    setEditingProduct(prev => prev ? {...prev, imageUrl: val} : null);
                                                     handleProductChange(editingProduct.id, "imageUrl", val);
                                                 }}
                                                 placeholder="Image URL or Upload below"
-                                                className="w-full bg-[#0c2d20] border border-emerald-900 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500" 
+                                                className="w-full bg-[#0c2d20] border border-emerald-900 rounded-lg px-3 py-2 text-white text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none" 
                                             />
                                             <label className="w-full bg-emerald-900/40 hover:bg-emerald-800/60 border border-emerald-800 border-dashed rounded-lg px-3 py-2 text-emerald-300 text-[10px] font-bold cursor-pointer transition-all flex items-center justify-center gap-2">
                                                 <i className="fa-solid fa-cloud-arrow-up"></i>
@@ -959,10 +959,10 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                                             value={editingProduct.category}
                                             onChange={(e) => {
                                                 const val = e.target.value;
-                                                setEditingProduct({...editingProduct, category: val});
+                                                setEditingProduct(prev => prev ? {...prev, category: val} : null);
                                                 handleProductChange(editingProduct.id, "category", val);
                                             }}
-                                            className="w-full bg-[#0c2d20] border border-emerald-900 rounded-lg px-3 py-2 text-white text-xs" 
+                                            className="w-full bg-[#0c2d20] border border-emerald-900 rounded-lg px-3 py-2 text-white text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none" 
                                         />
                                     </div>
                                     <div>
@@ -972,10 +972,10 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                                             value={editingProduct.preparationTime}
                                             onChange={(e) => {
                                                 const val = e.target.value;
-                                                setEditingProduct({...editingProduct, preparationTime: val});
+                                                setEditingProduct(prev => prev ? {...prev, preparationTime: val} : null);
                                                 handleProductChange(editingProduct.id, "preparationTime", val);
                                             }}
-                                            className="w-full bg-[#0c2d20] border border-emerald-900 rounded-lg px-3 py-2 text-white text-xs" 
+                                            className="w-full bg-[#0c2d20] border border-emerald-900 rounded-lg px-3 py-2 text-white text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none" 
                                         />
                                     </div>
                                     <div className="md:col-span-2">
@@ -985,10 +985,10 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                                             value={editingProduct.description}
                                             onChange={(e) => {
                                                 const val = e.target.value;
-                                                setEditingProduct({...editingProduct, description: val});
+                                                setEditingProduct(prev => prev ? {...prev, description: val} : null);
                                                 handleProductChange(editingProduct.id, "description", val);
                                             }}
-                                            className="w-full bg-[#0c2d20] border border-emerald-900 rounded-lg px-3 py-2 text-white text-xs" 
+                                            className="w-full bg-[#0c2d20] border border-emerald-900 rounded-lg px-3 py-2 text-white text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none" 
                                         />
                                     </div>
                                     <div>
@@ -998,10 +998,10 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                                             value={editingProduct.deliveryDetails}
                                             onChange={(e) => {
                                                 const val = e.target.value;
-                                                setEditingProduct({...editingProduct, deliveryDetails: val});
+                                                setEditingProduct(prev => prev ? {...prev, deliveryDetails: val} : null);
                                                 handleProductChange(editingProduct.id, "deliveryDetails", val);
                                             }}
-                                            className="w-full bg-[#0c2d20] border border-emerald-900 rounded-lg px-3 py-2 text-white text-xs" 
+                                            className="w-full bg-[#0c2d20] border border-emerald-900 rounded-lg px-3 py-2 text-white text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none" 
                                         />
                                     </div>
                                 </div>

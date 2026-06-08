@@ -2,11 +2,9 @@ import React, { useState, useEffect } from 'react';
 // Triggering new build to resolve missing service resolution
 import { View } from './types';
 import ChatInterface from './components/ChatInterface';
-import AdminPanel from './components/AdminPanel';
-import Login from './components/Login';
 import Storefront from './components/Storefront';
 import { LiquidBackground } from './components/LiquidBackground';
-import { Settings } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import { mockDB } from './services/mockFirebase';
 
 const App: React.FC = () => {
@@ -44,10 +42,6 @@ const App: React.FC = () => {
         return <Storefront />;
       case View.CHAT:
         return <ChatInterface />;
-      case View.ADMIN_LOGIN:
-        return <Login onLoginSuccess={() => setCurrentView(View.ADMIN_DASHBOARD)} onBack={() => setCurrentView(View.STOREFRONT)} />;
-      case View.ADMIN_DASHBOARD:
-        return <AdminPanel onLogout={() => setCurrentView(View.STOREFRONT)} />;
       default:
         return <Storefront />;
     }
@@ -55,22 +49,24 @@ const App: React.FC = () => {
 
   return (
     <LiquidBackground>
-      <div className="h-screen w-full relative overflow-hidden">
+      <div className="min-h-screen w-full relative overflow-y-auto">
         {/* Main Content Layer */}
-        <div className="relative z-10 h-full w-full">
+        <div className="relative z-10 min-h-full w-full">
           {renderView()}
         </div>
 
-        {/* Admin Toggle - Floating Glass Button */}
-        {currentView === View.STOREFRONT && (
-          <button 
-            onClick={() => setCurrentView(View.ADMIN_LOGIN)}
-            className="fixed bottom-6 right-6 z-50 glass rounded-full p-3 shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 group bg-white/10"
-            title="Settings"
-          >
-            <Settings size={20} className="text-white/70 group-hover:text-emerald-400 transition-colors" />
-          </button>
-        )}
+        {/* View Toggle - Floating Glass Button */}
+        <button 
+          onClick={() => setCurrentView(currentView === View.STOREFRONT ? View.CHAT : View.STOREFRONT)}
+          className="fixed bottom-6 right-6 z-50 glass rounded-full p-3 shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 group bg-white/10"
+          title={currentView === View.STOREFRONT ? "Chat with AI Assistant" : "View Storefront"}
+        >
+          {currentView === View.STOREFRONT ? (
+            <MessageSquare size={20} className="text-white/70 group-hover:text-emerald-400 transition-colors" />
+          ) : (
+            <div className="bg-white/10 rounded-full p-1"><i className="fa-solid fa-utensils text-white/70 group-hover:text-emerald-400"></i></div>
+          )}
+        </button>
       </div>
     </LiquidBackground>
   );
