@@ -402,17 +402,31 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
             description: newProductForm.description || ""
         };
 
-        const { error } = await supabase
-            .from('products')
-            .insert([productToAdd]);
+        try {
+            const { error } = await supabase
+                .from('products')
+                .insert([productToAdd]);
 
-        if (error) {
-            triggerToast("Failed to add product: " + error.message, "error");
-        } else {
-            setProducts([productToAdd, ...products]);
-            setAdminProducts([productToAdd, ...adminProducts]);
-            setShowAddProductModal(false);
-            triggerToast("Product added to menu successfully!");
+            if (error) {
+                triggerToast("Failed to add product: " + error.message, "error");
+            } else {
+                setProducts([productToAdd, ...products]);
+                setAdminProducts([productToAdd, ...adminProducts]);
+                setShowAddProductModal(false);
+                setNewProductForm({
+                    nameEnglish: "",
+                    nameMalayalam: "",
+                    price: 0,
+                    imageUrl: "",
+                    category: "",
+                    preparationTime: "",
+                    deliveryDetails: "",
+                    description: ""
+                });
+                triggerToast("Product added to menu successfully!");
+            }
+        } catch (err: any) {
+            triggerToast("Error: " + err.message, "error");
         }
     };
 
@@ -578,12 +592,15 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                                 </button>
                             </div>
                         ) : (
-                            <button 
-                                onClick={() => setShowLoginModal(true)}
-                                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-emerald-900/60 text-emerald-200 hover:bg-emerald-800/80 border border-emerald-800 rounded-full text-xs sm:text-sm font-semibold transition-all whitespace-nowrap"
-                            >
-                                <i className="fa-solid fa-lock sm:mr-2"></i> <span className="hidden xs:inline">Login</span>
-                            </button>
+                            /* Only show Login button if 'admin=true' is in the URL */
+                            new URLSearchParams(window.location.search).get('admin') === 'true' && (
+                                <button 
+                                    onClick={() => setShowLoginModal(true)}
+                                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-emerald-900/60 text-emerald-200 hover:bg-emerald-800/80 border border-emerald-800 rounded-full text-xs sm:text-sm font-semibold transition-all whitespace-nowrap"
+                                >
+                                    <i className="fa-solid fa-lock sm:mr-2"></i> <span className="hidden xs:inline">Login</span>
+                                </button>
+                            )
                         )}
                     </div>
                 </div>
@@ -680,7 +697,8 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                                 <i className="fa-solid fa-basket-shopping text-5xl text-emerald-700 mb-4"></i>
                                 <h3 className="text-xl font-bold">No Menu Items Configured</h3>
                                 <p className="text-emerald-300/60 mt-2">Go to the Customize Panel to add product details.</p>
-                                {!isAdmin && (
+                                {/* Only show Admin Login button if 'admin=true' is in the URL */}
+                                {!isAdmin && new URLSearchParams(window.location.search).get('admin') === 'true' && (
                                     <button 
                                         onClick={() => setShowLoginModal(true)}
                                         className="mt-4 bg-amber-400 hover:bg-amber-500 text-[#0c2d20] text-xs font-bold px-4 py-2 rounded-xl transition-all"
@@ -1541,11 +1559,11 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                                 onClick={() => {
                                     if (isAdmin) {
                                         setActiveTab("admin");
-                                    } else {
+                                    } else if (new URLSearchParams(window.location.search).get('admin') === 'true') {
                                         setShowLoginModal(true);
                                     }
                                 }} 
-                                className="hover:underline text-amber-400 font-bold"
+                                className={`hover:underline text-amber-400 font-bold ${(!isAdmin && new URLSearchParams(window.location.search).get('admin') !== 'true') ? 'hidden' : ''}`}
                             >
                                 {isAdmin ? "Admin Settings" : "Admin Panel Login"}
                             </button>
