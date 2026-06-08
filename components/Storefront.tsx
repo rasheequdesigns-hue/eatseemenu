@@ -149,11 +149,12 @@ export default function Storefront() {
                     .from('company_config')
                     .select('*')
                     .eq('id', 1)
-                    .single();
+                    .maybeSingle();
                 
                 if (cData && !cErr) {
-                    setCompany(cData);
-                    setAdminCompany(cData);
+                    const { id, created_at, ...cleanData } = cData;
+                    setCompany(cleanData);
+                    setAdminCompany(cleanData);
                 }
 
                 // Fetch Products
@@ -389,9 +390,7 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
             return;
         }
 
-        const newId = (Date.now()).toString();
-        const productToAdd: Product = {
-            id: newId,
+        const productToAdd = {
             nameEnglish: newProductForm.nameEnglish,
             nameMalayalam: newProductForm.nameMalayalam,
             price: newProductForm.price,
@@ -403,15 +402,17 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
         };
 
         try {
-            const { error } = await supabase
+            const { data, error } = await supabase
                 .from('products')
-                .insert([productToAdd]);
+                .insert([productToAdd])
+                .select()
+                .single();
 
             if (error) {
                 triggerToast("Failed to add product: " + error.message, "error");
             } else {
-                setProducts([productToAdd, ...products]);
-                setAdminProducts([productToAdd, ...adminProducts]);
+                setProducts([data, ...products]);
+                setAdminProducts([data, ...adminProducts]);
                 setShowAddProductModal(false);
                 setNewProductForm({
                     nameEnglish: "",
