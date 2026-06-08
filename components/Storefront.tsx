@@ -390,10 +390,11 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
             return;
         }
 
+        // Try to insert with camelCase first, but ensure we handle errors clearly
         const productToAdd = {
             nameEnglish: newProductForm.nameEnglish,
             nameMalayalam: newProductForm.nameMalayalam,
-            price: newProductForm.price,
+            price: Number(newProductForm.price),
             imageUrl: newProductForm.imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400",
             category: newProductForm.category || "General",
             preparationTime: newProductForm.preparationTime || "Not specified",
@@ -404,28 +405,74 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
         try {
             const { data, error } = await supabase
                 .from('products')
-                .insert([productToAdd])
+                .insert(productToAdd) // Supabase can take a single object
                 .select()
                 .single();
 
             if (error) {
-                triggerToast("Failed to add product: " + error.message, "error");
+                console.error("Supabase Insert Error:", error);
+                // If it fails with a 400, it might be due to column naming (camelCase vs snake_case)
+                // Let's try one more time with snake_case if we suspect it
+                if (error.code === '42703' || error.message?.includes('column')) {
+                    const snakeProduct = {
+                        name_english: productToAdd.nameEnglish,
+                        name_malayalam: productToAdd.nameMalayalam,
+                        price: productToAdd.price,
+                        image_url: productToAdd.imageUrl,
+                        category: productToAdd.category,
+                        preparation_time: productToAdd.preparationTime,
+                        delivery_details: productToAdd.deliveryDetails,
+                        description: productToAdd.description
+                    };
+                    
+                    const { data: sData, error: sError } = await supabase
+                        .from('products')
+                        .insert(snakeProduct)
+                        .select()
+                        .single();
+                        
+                    if (sError) {
+                        triggerToast("Failed to add product: " + sError.message, "error");
+                        return;
+                    }
+                    
+                    // If snake_case worked, map it back to camelCase for the UI
+                    const mappedData = {
+                        id: sData.id,
+                        nameEnglish: sData.name_english,
+                        nameMalayalam: sData.name_malayalam,
+                        price: sData.price,
+                        imageUrl: sData.image_url,
+                        category: sData.category,
+                        preparationTime: sData.preparation_time,
+                        deliveryDetails: sData.delivery_details,
+                        description: sData.description,
+                        created_at: sData.created_at
+                    };
+                    
+                    setProducts([mappedData, ...products]);
+                    setAdminProducts([mappedData, ...adminProducts]);
+                } else {
+                    triggerToast("Failed to add product: " + error.message, "error");
+                    return;
+                }
             } else {
                 setProducts([data, ...products]);
                 setAdminProducts([data, ...adminProducts]);
-                setShowAddProductModal(false);
-                setNewProductForm({
-                    nameEnglish: "",
-                    nameMalayalam: "",
-                    price: 0,
-                    imageUrl: "",
-                    category: "",
-                    preparationTime: "",
-                    deliveryDetails: "",
-                    description: ""
-                });
-                triggerToast("Product added to menu successfully!");
             }
+
+            setShowAddProductModal(false);
+            setNewProductForm({
+                nameEnglish: "",
+                nameMalayalam: "",
+                price: 0,
+                imageUrl: "",
+                category: "",
+                preparationTime: "",
+                deliveryDetails: "",
+                description: ""
+            });
+            triggerToast("Product added to menu successfully!");
         } catch (err: any) {
             triggerToast("Error: " + err.message, "error");
         }
