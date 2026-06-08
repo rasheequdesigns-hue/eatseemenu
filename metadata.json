@@ -1,6 +1,6 @@
 {
-  "name": "Samastha AI Portal",
-  "description": "A multilingual AI chatbot and knowledge base for Samastha Kerala Jamiyyathul Ulama, featuring voice interaction and RAG capabilities.",
+  "name": "Eatsee Menu Portal",
+  "description": "Interactive food brand storefront and menu management for Eatsee.",
   "requestFramePermissions": [
     "microphone"
   ]
