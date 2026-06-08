@@ -103,6 +103,17 @@ export default function Storefront() {
     const [activeTab, setActiveTab] = useState("menu"); 
     const [showFlyerModal, setShowFlyerModal] = useState(false);
     const [showResetConfirm, setShowResetConfirm] = useState(false);
+    const [showAddProductModal, setShowAddProductModal] = useState(false);
+    const [newProductForm, setNewProductForm] = useState<Partial<Product>>({
+        nameEnglish: "",
+        nameMalayalam: "",
+        price: 0,
+        imageUrl: "",
+        category: "",
+        preparationTime: "",
+        deliveryDetails: "",
+        description: ""
+    });
     
     // Administrative Portal States
     const [showLoginModal, setShowLoginModal] = useState(false);
@@ -357,22 +368,62 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
     };
 
     const handleAddNewProduct = () => {
+        setNewProductForm({
+            nameEnglish: "",
+            nameMalayalam: "",
+            price: 0,
+            imageUrl: "",
+            category: "",
+            preparationTime: "",
+            deliveryDetails: "",
+            description: ""
+        });
+        setShowAddProductModal(true);
+    };
+
+    const handleCreateProduct = async (e: React.FormEvent) => {
+        e.preventDefault();
         const newId = (Date.now()).toString();
-        const newProd: Product = {
+        const productToAdd: Product = {
             id: newId,
-            nameEnglish: "New Item",
-            nameMalayalam: "പുതിയ വിഭവം",
-            price: 10,
-            imageUrl: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400",
-            category: "Sides",
-            preparationTime: "15 mins",
-            deliveryDetails: "Standard Delivery",
-            description: "Describe the incredible taste, fresh ingredients and preparation details here."
+            nameEnglish: newProductForm.nameEnglish || "New Item",
+            nameMalayalam: newProductForm.nameMalayalam || "പുതിയ വിഭവം",
+            price: newProductForm.price || 0,
+            imageUrl: newProductForm.imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400",
+            category: newProductForm.category || "Sides",
+            preparationTime: newProductForm.preparationTime || "15 mins",
+            deliveryDetails: newProductForm.deliveryDetails || "Standard Delivery",
+            description: newProductForm.description || ""
         };
-        setAdminProducts([newProd, ...adminProducts]);
-        setProducts([newProd, ...products]);
-        setEditingProduct(newProd);
-        triggerToast("New item draft created!");
+
+        const { error } = await supabase
+            .from('products')
+            .insert([productToAdd]);
+
+        if (error) {
+            triggerToast("Failed to add product: " + error.message, "error");
+        } else {
+            setProducts([productToAdd, ...products]);
+            setAdminProducts([productToAdd, ...adminProducts]);
+            setShowAddProductModal(false);
+            triggerToast("Product added to menu successfully!");
+        }
+    };
+
+    const handleNewProductImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 1 * 1024 * 1024) {
+                triggerToast("Product image too large! Please use a smaller image (under 1MB).", "error");
+                return;
+            }
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setNewProductForm(prev => ({ ...prev, imageUrl: reader.result as string }));
+                triggerToast("Product image uploaded successfully!");
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     const handleDeleteProduct = async (id: string) => {
@@ -852,7 +903,15 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
 
                                                 <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                                                     <button 
-                                                        onClick={() => setEditingProduct(editingProduct?.id === p.id ? null : p)}
+                                                        onClick={() => {
+                                                            setEditingProduct(editingProduct?.id === p.id ? null : p);
+                                                            if (editingProduct?.id !== p.id) {
+                                                                setTimeout(() => {
+                                                                    const el = document.getElementById('edit-product-form');
+                                                                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                                                                }, 100);
+                                                            }
+                                                        }}
                                                         className="bg-emerald-800/80 hover:bg-emerald-800 text-emerald-300 text-[10px] sm:text-xs px-2 sm:px-3 py-1.5 rounded-lg border border-emerald-700 transition-all"
                                                     >
                                                         <i className="fa-solid fa-pen-to-square"></i> <span className="hidden xs:inline">{editingProduct?.id === p.id ? "Close" : "Edit"}</span>
@@ -881,7 +940,7 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                         </div>
 
                         {editingProduct && (
-                            <div className="mt-8 bg-emerald-950/40 p-6 rounded-2xl border border-dashed border-emerald-800/60">
+                            <div id="edit-product-form" className="mt-8 bg-emerald-950/40 p-6 rounded-2xl border border-dashed border-emerald-800/60 scroll-mt-20">
                                 <div className="flex justify-between items-center mb-4 border-b border-emerald-900 pb-2">
                                     <h4 className="text-lg font-bold text-amber-300">
                                         Editing: {editingProduct.nameEnglish} ({editingProduct.nameMalayalam})
@@ -1278,6 +1337,146 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                                 Yes, Reset Defaults
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Add New Product Modal */}
+            {showAddProductModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm overflow-y-auto">
+                    <div className="bg-[#0c2d20] border border-emerald-900 rounded-[32px] p-6 sm:p-8 max-w-2xl w-full shadow-2xl relative my-8">
+                        <button 
+                            onClick={() => setShowAddProductModal(false)}
+                            className="absolute top-6 right-6 text-emerald-400 hover:text-white transition-all"
+                        >
+                            <i className="fa-solid fa-circle-xmark text-2xl"></i>
+                        </button>
+                        
+                        <div className="flex items-center gap-3 mb-6 border-b border-emerald-900/60 pb-4">
+                            <div className="w-12 h-12 bg-amber-400/20 text-amber-400 rounded-2xl flex items-center justify-center text-xl">
+                                <i className="fa-solid fa-plus"></i>
+                            </div>
+                            <div>
+                                <h3 className="text-2xl font-bold text-white">Add New Menu Item</h3>
+                                <p className="text-xs text-emerald-300/60">Fill in the details to add a new product to your menu poster.</p>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleCreateProduct} className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs text-emerald-400 font-bold mb-2 uppercase tracking-wider">Item Name (English)</label>
+                                    <input 
+                                        type="text" 
+                                        required
+                                        placeholder="e.g. Chicken Biriyani"
+                                        value={newProductForm.nameEnglish}
+                                        onChange={(e) => setNewProductForm({...newProductForm, nameEnglish: e.target.value})}
+                                        className="w-full bg-[#081f16] border border-emerald-900 rounded-xl px-4 py-3 text-white text-sm focus:ring-1 focus:ring-emerald-500 focus:outline-none" 
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-emerald-400 font-bold mb-2 uppercase tracking-wider">Item Name (Malayalam)</label>
+                                    <input 
+                                        type="text" 
+                                        required
+                                        placeholder="ഉദാ: ചിക്കൻ ബിരിയാണി"
+                                        value={newProductForm.nameMalayalam}
+                                        onChange={(e) => setNewProductForm({...newProductForm, nameMalayalam: e.target.value})}
+                                        className="w-full bg-[#081f16] border border-emerald-900 rounded-xl px-4 py-3 text-white text-sm font-serif focus:ring-1 focus:ring-emerald-500 focus:outline-none" 
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-emerald-400 font-bold mb-2 uppercase tracking-wider">Price ({company.currencySymbol})</label>
+                                    <input 
+                                        type="number" 
+                                        required
+                                        min="0"
+                                        value={newProductForm.price || ""}
+                                        onChange={(e) => setNewProductForm({...newProductForm, price: parseInt(e.target.value) || 0})}
+                                        className="w-full bg-[#081f16] border border-emerald-900 rounded-xl px-4 py-3 text-white text-sm focus:ring-1 focus:ring-emerald-500 focus:outline-none" 
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-emerald-400 font-bold mb-2 uppercase tracking-wider">Category</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="e.g. Main Course"
+                                        value={newProductForm.category}
+                                        onChange={(e) => setNewProductForm({...newProductForm, category: e.target.value})}
+                                        className="w-full bg-[#081f16] border border-emerald-900 rounded-xl px-4 py-3 text-white text-sm focus:ring-1 focus:ring-emerald-500 focus:outline-none" 
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs text-emerald-400 font-bold mb-2 uppercase tracking-wider">Product Image</label>
+                                <div className="flex flex-col sm:flex-row gap-4">
+                                    <div className="w-full sm:w-32 h-32 bg-[#081f16] border border-emerald-900 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center">
+                                        {newProductForm.imageUrl ? (
+                                            <img src={newProductForm.imageUrl} className="w-full h-full object-cover" alt="Preview" />
+                                        ) : (
+                                            <i className="fa-regular fa-image text-3xl text-emerald-800"></i>
+                                        )}
+                                    </div>
+                                    <div className="flex-grow space-y-3">
+                                        <input 
+                                            type="text" 
+                                            placeholder="Paste Image URL or upload below"
+                                            value={newProductForm.imageUrl}
+                                            onChange={(e) => setNewProductForm({...newProductForm, imageUrl: e.target.value})}
+                                            className="w-full bg-[#081f16] border border-emerald-900 rounded-xl px-4 py-3 text-white text-sm focus:ring-1 focus:ring-emerald-500 focus:outline-none" 
+                                        />
+                                        <label className="w-full bg-emerald-900/40 hover:bg-emerald-800/60 border border-emerald-800 border-dashed rounded-xl px-4 py-3 text-emerald-300 text-xs font-bold cursor-pointer transition-all flex items-center justify-center gap-2">
+                                            <i className="fa-solid fa-cloud-arrow-up"></i>
+                                            Upload from Device
+                                            <input type="file" accept="image/*" onChange={handleNewProductImageUpload} className="hidden" />
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs text-emerald-400 font-bold mb-2 uppercase tracking-wider">Preparation Time</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="e.g. 20 mins"
+                                        value={newProductForm.preparationTime}
+                                        onChange={(e) => setNewProductForm({...newProductForm, preparationTime: e.target.value})}
+                                        className="w-full bg-[#081f16] border border-emerald-900 rounded-xl px-4 py-3 text-white text-sm focus:ring-1 focus:ring-emerald-500 focus:outline-none" 
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-emerald-400 font-bold mb-2 uppercase tracking-wider">Delivery Details</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="e.g. Served hot with chutney"
+                                        value={newProductForm.deliveryDetails}
+                                        onChange={(e) => setNewProductForm({...newProductForm, deliveryDetails: e.target.value})}
+                                        className="w-full bg-[#081f16] border border-emerald-900 rounded-xl px-4 py-3 text-white text-sm focus:ring-1 focus:ring-emerald-500 focus:outline-none" 
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs text-emerald-400 font-bold mb-2 uppercase tracking-wider">Product Description</label>
+                                <textarea 
+                                    placeholder="Write a tasty description of your dish..."
+                                    value={newProductForm.description}
+                                    onChange={(e) => setNewProductForm({...newProductForm, description: e.target.value})}
+                                    rows={3}
+                                    className="w-full bg-[#081f16] border border-emerald-900 rounded-xl px-4 py-3 text-white text-sm focus:ring-1 focus:ring-emerald-500 focus:outline-none resize-none" 
+                                ></textarea>
+                            </div>
+
+                            <button 
+                                type="submit"
+                                className="w-full bg-amber-400 hover:bg-amber-500 text-amber-950 font-black py-4 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 text-lg uppercase tracking-widest"
+                            >
+                                <i className="fa-solid fa-circle-check"></i> Add Product to Menu
+                            </button>
+                        </form>
                     </div>
                 </div>
             )}
