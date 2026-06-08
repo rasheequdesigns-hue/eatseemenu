@@ -383,16 +383,22 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
 
     const handleCreateProduct = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (!newProductForm.nameEnglish?.trim() || !newProductForm.nameMalayalam?.trim() || !newProductForm.price) {
+            triggerToast("Please enter at least the Product Names and Price.", "error");
+            return;
+        }
+
         const newId = (Date.now()).toString();
         const productToAdd: Product = {
             id: newId,
-            nameEnglish: newProductForm.nameEnglish || "New Item",
-            nameMalayalam: newProductForm.nameMalayalam || "പുതിയ വിഭവം",
-            price: newProductForm.price || 0,
+            nameEnglish: newProductForm.nameEnglish,
+            nameMalayalam: newProductForm.nameMalayalam,
+            price: newProductForm.price,
             imageUrl: newProductForm.imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400",
-            category: newProductForm.category || "Sides",
-            preparationTime: newProductForm.preparationTime || "15 mins",
-            deliveryDetails: newProductForm.deliveryDetails || "Standard Delivery",
+            category: newProductForm.category || "General",
+            preparationTime: newProductForm.preparationTime || "Not specified",
+            deliveryDetails: newProductForm.deliveryDetails || "Standard",
             description: newProductForm.description || ""
         };
 
