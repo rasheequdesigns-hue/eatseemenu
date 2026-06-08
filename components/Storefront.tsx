@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import { Product, CompanyDetails } from '../types';
 
 // Initialize Supabase Client
 const SUPABASE_URL = "https://vmjposgabkrrlszpppba.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtanBvc2dhYmtycmxzenBwcGJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Mzc5MDgsImV4cCI6MjA5NjQxMzkwOH0.RrQIAAWX3MI_JdDv-Bkk6I5ARmR7uw5tt9wrvq6pO74";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const DEFAULT_COMPANY_DETAILS = {
+const DEFAULT_COMPANY_DETAILS: CompanyDetails = {
     name: "My Store",
     tagline: "",
     sloganMalayalam: "വിളിക്കൂ... വീട്ടിലെത്തിക്കാം",
@@ -18,7 +19,7 @@ const DEFAULT_COMPANY_DETAILS = {
     logoUrl: "" 
 };
 
-const DEFAULT_PRODUCTS = [
+const DEFAULT_PRODUCTS: Product[] = [
     {
         id: "1",
         nameEnglish: "Pathiri",
@@ -93,12 +94,12 @@ export default function Storefront() {
         return saved ? JSON.parse(saved) : DEFAULT_COMPANY_DETAILS;
     });
 
-    const [products, setProducts] = useState(() => {
+    const [products, setProducts] = useState<Product[]>(() => {
         const saved = localStorage.getItem("eatsee_products");
         return saved ? JSON.parse(saved) : DEFAULT_PRODUCTS;
     });
 
-    const [selectedProduct, setSelectedProduct] = useState<any>(null);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [activeTab, setActiveTab] = useState("menu"); 
     const [showFlyerModal, setShowFlyerModal] = useState(false);
     const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -110,7 +111,7 @@ export default function Storefront() {
         return localStorage.getItem("eatsee_isAdmin") === "true";
     });
 
-    const [toast, setToast] = useState<any>(null);
+    const [toast, setToast] = useState<{message: string, type: string} | null>(null);
 
     // Customer Form Fields
     const [orderForm, setOrderForm] = useState({
@@ -124,9 +125,9 @@ export default function Storefront() {
     });
 
     // Admin Editable States
-    const [adminCompany, setAdminCompany] = useState({ ...company });
-    const [adminProducts, setAdminProducts] = useState([...products]);
-    const [editingProduct, setEditingProduct] = useState<any>(null);
+    const [adminCompany, setAdminCompany] = useState<CompanyDetails>({ ...company });
+    const [adminProducts, setAdminProducts] = useState<Product[]>([...products]);
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
     // Fetch initial data from Supabase
     useEffect(() => {
@@ -312,6 +313,25 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
         }
     };
 
+    const handleProductImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        const currentProduct = editingProduct;
+        if (file && currentProduct) {
+            if (file.size > 1 * 1024 * 1024) {
+                triggerToast("Product image too large! Please use a smaller image (under 1MB).", "error");
+                return;
+            }
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const b64 = reader.result as string;
+                setEditingProduct({ ...currentProduct, imageUrl: b64 });
+                handleProductChange(currentProduct.id, "imageUrl", b64);
+                triggerToast("Product image uploaded successfully!");
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleProductChange = (id: string, field: string, value: any) => {
         const updated = adminProducts.map(p => {
             if (p.id === id) {
@@ -338,7 +358,7 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
 
     const handleAddNewProduct = () => {
         const newId = (Date.now()).toString();
-        const newProd = {
+        const newProd: Product = {
             id: newId,
             nameEnglish: "New Item",
             nameMalayalam: "പുതിയ വിഭവം",
@@ -912,17 +932,25 @@ _Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs text-emerald-400 font-bold mb-1 uppercase">Image URL (Unsplash/Direct link)</label>
-                                        <input 
-                                            type="text" 
-                                            value={editingProduct.imageUrl}
-                                            onChange={(e) => {
-                                                const val = e.target.value;
-                                                setEditingProduct({...editingProduct, imageUrl: val});
-                                                handleProductChange(editingProduct.id, "imageUrl", val);
-                                            }}
-                                            className="w-full bg-[#0c2d20] border border-emerald-900 rounded-lg px-3 py-2 text-white text-xs" 
-                                        />
+                                        <label className="block text-xs text-emerald-400 font-bold mb-1 uppercase">Product Image</label>
+                                        <div className="flex flex-col gap-2">
+                                            <input 
+                                                type="text" 
+                                                value={editingProduct.imageUrl}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    setEditingProduct({...editingProduct, imageUrl: val});
+                                                    handleProductChange(editingProduct.id, "imageUrl", val);
+                                                }}
+                                                placeholder="Image URL or Upload below"
+                                                className="w-full bg-[#0c2d20] border border-emerald-900 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500" 
+                                            />
+                                            <label className="w-full bg-emerald-900/40 hover:bg-emerald-800/60 border border-emerald-800 border-dashed rounded-lg px-3 py-2 text-emerald-300 text-[10px] font-bold cursor-pointer transition-all flex items-center justify-center gap-2">
+                                                <i className="fa-solid fa-cloud-arrow-up"></i>
+                                                Upload Image
+                                                <input type="file" accept="image/*" onChange={handleProductImageUpload} className="hidden" />
+                                            </label>
+                                        </div>
                                     </div>
                                     <div>
                                         <label className="block text-xs text-emerald-400 font-bold mb-1 uppercase">Category</label>

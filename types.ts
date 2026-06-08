@@ -97,6 +97,31 @@ export interface AuditLog {
   severity: 'Info' | 'Warning' | 'Critical';
 }
 
+export interface Product {
+  id: string;
+  nameEnglish: string;
+  nameMalayalam: string;
+  price: number;
+  imageUrl: string;
+  category: string;
+  preparationTime: string;
+  deliveryDetails: string;
+  description: string;
+  created_at?: string;
+}
+
+export interface CompanyDetails {
+  name: string;
+  tagline: string;
+  sloganMalayalam: string;
+  address: string;
+  phone: string;
+  deliveryCharge: number;
+  freeDeliveryOver: number;
+  currencySymbol: string;
+  logoUrl: string;
+}
+
 export enum View {
   STOREFRONT = 'STOREFRONT',
   CHAT = 'CHAT',
