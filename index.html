@@ -3,72 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eatsee Menu Portal</title>
-    
+    <title>Food Products - Order via WhatsApp</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    screens: {
-                        'xs': '480px',
-                    },
-                    colors: {
-                        emerald: {
-                            50: '#ecfdf5',
-                            100: '#d1fae5',
-                            200: '#a7f3d0',
-                            300: '#6ee7b7',
-                            400: '#34d399',
-                            500: '#10b981',
-                            600: '#059669',
-                            700: '#047857',
-                            800: '#065f46',
-                            900: '#064e3b',
-                            950: '#022c22',
-                        },
-                    },
-                    animation: {
-                        'float-slow': 'float 20s ease-in-out infinite',
-                        'float-medium': 'float 15s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
-                            '33%': { transform: 'translate(5%, 5%) scale(1.1)' },
-                            '66%': { transform: 'translate(-5%, 2%) scale(0.9)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    
-    <!-- FontAwesome for icons -->
+    <!-- FontAwesome for beautiful icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts: Inter, Manjari, Gayathri -->
+    <!-- Google Fonts: Inter & Manjari (ideal for Malayalam legibility) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manjari:wght@400;700&family=Gayathri:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manjari:wght@400;700&family=Gayathri:wght700&display=swap" rel="stylesheet">
     
     <style>
         body {
             font-family: 'Inter', 'Manjari', sans-serif;
-            background-color: #0c2d20;
+            background-color: #0c2d20; /* Deep Forest Green matching image_82eb2b.jpg */
             background-image: radial-gradient(#0f382a 1px, transparent 1px), radial-gradient(#0f382a 1px, transparent 1px);
             background-size: 24px 24px;
             background-position: 0 0, 12px 12px;
-            margin: 0;
-            padding: 0;
         }
         .malayalam-title {
             font-family: 'Gayathri', 'Manjari', sans-serif;
             text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.4);
         }
         .poster-card {
-            border-radius: 40px;
+            border-radius: 40px; /* Exact high rounding seen in image_82eb2b.jpg */
             background-color: #ffffff;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
@@ -77,13 +35,16 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
         }
         .custom-scroll::-webkit-scrollbar {
-            display: none;
+            width: 6px;
         }
-        .custom-scroll {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #0f382a;
         }
-        /* Hide main scrollbar */
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #1e5c46;
+            border-radius: 10px;
+        }
+        /* Hide scrollbar but keep functionality */
         body::-webkit-scrollbar {
             display: none;
         }
@@ -94,7 +55,1452 @@
     </style>
 </head>
 <body class="text-slate-100 min-h-screen flex flex-col antialiased">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+
+    <!-- React Application Target Div -->
+    <div id="root" class="flex flex-col min-h-screen"></div>
+
+    <!-- React, Babel & Component Logic -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Initialize Supabase Client
+        const SUPABASE_URL = "https://vmjposgabkrrlszpppba.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtanBvc2dhYmtycmxzenBwcGJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4Mzc5MDgsImV4cCI6MjA5NjQxMzkwOH0.RrQIAAWX3MI_JdDv-Bkk6I5ARmR7uw5tt9wrvq6pO74";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const DEFAULT_COMPANY_DETAILS = {
+            name: "My Store",
+            tagline: "",
+            sloganMalayalam: "വിളിക്കൂ... വീട്ടിലെത്തിക്കാം",
+            address: "Omassery, Calicut",
+            phone: "+919562496164", 
+            deliveryCharge: 20,
+            freeDeliveryOver: 150,
+            currencySymbol: "₹",
+            logoUrl: "" 
+        };
+
+        // Populate with the 6 exact default products from image_82eb2b.jpg
+        const DEFAULT_PRODUCTS = [
+            {
+                id: "1",
+                nameEnglish: "Pathiri",
+                nameMalayalam: "പത്തിരി",
+                price: 4,
+                imageUrl: "https://images.unsplash.com/photo-1626132647523-66f5bf380027?auto=format&fit=crop&q=80&w=400",
+                category: "Breads",
+                preparationTime: "10 mins",
+                deliveryDetails: "Delivered fresh & hot in food-grade wrapping.",
+                description: "Traditional soft, paper-thin rice pancakes perfect with delicious curries."
+            },
+            {
+                id: "2",
+                nameEnglish: "Vellayappam",
+                nameMalayalam: "വെള്ളയപ്പം",
+                price: 6,
+                imageUrl: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&q=80&w=400",
+                category: "Breads",
+                preparationTime: "10 mins",
+                deliveryDetails: "Best consumed within 4 hours.",
+                description: "Spongy, fermented rice and coconut hoppers with crispy laced edges."
+            },
+            {
+                id: "3",
+                nameEnglish: "Chappathi",
+                nameMalayalam: "ചപ്പാത്തി",
+                price: 5,
+                imageUrl: "https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?auto=format&fit=crop&q=80&w=400",
+                category: "Breads",
+                preparationTime: "15 mins",
+                deliveryDetails: "Standard thermal delivery packing.",
+                description: "Whole wheat hand-rolled soft chappathis made with high-quality grains."
+            },
+            {
+                id: "4",
+                nameEnglish: "Noolputtu",
+                nameMalayalam: "നൂൽപുട്ട്",
+                price: 6,
+                imageUrl: "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?auto=format&fit=crop&q=80&w=400",
+                category: "Breads",
+                preparationTime: "12 mins",
+                deliveryDetails: "Steamed and packed directly from kitchen counters.",
+                description: "Delicate string hoppers made of steamed rice flour pressed into noodles."
+            },
+            {
+                id: "5",
+                nameEnglish: "Idli",
+                nameMalayalam: "ഇഡ്ഡലി",
+                price: 6,
+                imageUrl: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&q=80&w=400",
+                category: "Breakfast",
+                preparationTime: "10 mins",
+                deliveryDetails: "Shipped with complimentary green chutney.",
+                description: "Savory steamed cakes made of fermented black lentils and rice."
+            },
+            {
+                id: "6",
+                nameEnglish: "Porotta",
+                nameMalayalam: "പൊറോട്ട",
+                price: 12,
+                imageUrl: "https://images.unsplash.com/photo-1626132647523-66f5bf380027?auto=format&fit=crop&q=80&w=400",
+                category: "Breads",
+                preparationTime: "15 mins",
+                deliveryDetails: "Wrapped in protective thermal insulation.",
+                description: "Layered, flaky flatbread made from refined flour, perfectly kneaded and beaten."
+            }
+        ];
+
+        function App() {
+            const [company, setCompany] = useState(() => {
+                const saved = localStorage.getItem("eatsee_company");
+                return saved ? JSON.parse(saved) : DEFAULT_COMPANY_DETAILS;
+            });
+
+            const [products, setProducts] = useState(() => {
+                const saved = localStorage.getItem("eatsee_products");
+                return saved ? JSON.parse(saved) : DEFAULT_PRODUCTS;
+            });
+
+            const [selectedProduct, setSelectedProduct] = useState(null);
+            const [activeTab, setActiveTab] = useState("menu"); 
+            const [showFlyerModal, setShowFlyerModal] = useState(false);
+            const [showResetConfirm, setShowResetConfirm] = useState(false);
+            const [showAddProductModal, setShowAddProductModal] = useState(false);
+            const [newProductForm, setNewProductForm] = useState({
+                nameEnglish: "",
+                nameMalayalam: "",
+                price: "",
+                imageUrl: "",
+                category: "",
+                preparationTime: "",
+                deliveryDetails: "",
+                description: ""
+            });
+            
+            // Administrative Portal States
+            const [showLoginModal, setShowLoginModal] = useState(false);
+            const [pinInput, setPinInput] = useState("");
+            const [isAdmin, setIsAdmin] = useState(() => {
+                return localStorage.getItem("eatsee_isAdmin") === "true";
+            });
+
+            const [toast, setToast] = useState(null);
+
+            // Customer Form Fields
+            const [orderForm, setOrderForm] = useState({
+                customerName: "",
+                quantity: 10,
+                deliveryType: "delivery", 
+                location: "",
+                landmark: "",
+                deliveryTime: "ASAP",
+                notes: ""
+            });
+
+            // Admin Editable States
+            const [adminCompany, setAdminCompany] = useState({ ...company });
+            const [adminProducts, setAdminProducts] = useState([...products]);
+            const [editingProduct, setEditingProduct] = useState(null);
+
+            // Fetch initial data from Supabase
+            useEffect(() => {
+                const fetchCloudData = async () => {
+                    try {
+                        // Fetch Company Config
+                        const { data: cData, error: cErr } = await _supabase
+                            .from('company_config')
+                            .select('*')
+                            .eq('id', 1)
+                            .maybeSingle();
+                        
+                        if (cData && !cErr) {
+                            const { id, created_at, ...cleanData } = cData;
+                            setCompany(cleanData);
+                            setAdminCompany(cleanData);
+                        }
+
+                        // Fetch Products
+                        const { data: pData, error: pErr } = await _supabase
+                            .from('products')
+                            .select('*')
+                            .order('created_at', { ascending: false });
+                        
+                        if (pData && !pErr) {
+                            setProducts(pData);
+                            setAdminProducts(pData);
+                        }
+                    } catch (err) {
+                        console.error("Supabase sync failed:", err);
+                    }
+                };
+                fetchCloudData();
+            }, []);
+
+            useEffect(() => {
+                localStorage.setItem("eatsee_company", JSON.stringify(company));
+            }, [company]);
+
+            useEffect(() => {
+                localStorage.setItem("eatsee_products", JSON.stringify(products));
+            }, [products]);
+
+            // Sync query params AND localStorage
+            useEffect(() => {
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('admin') === 'true') {
+                    setIsAdmin(true);
+                    localStorage.setItem("eatsee_isAdmin", "true");
+                }
+            }, []);
+
+            const triggerToast = (message, type = "success") => {
+                setToast({ message, type });
+                setTimeout(() => setToast(null), 3500);
+            };
+
+            const copyLinkToClipboard = (textToCopy) => {
+                try {
+                    const textField = document.createElement('textarea');
+                    textField.innerText = textToCopy;
+                    document.body.appendChild(textField);
+                    textField.select();
+                    document.execCommand('copy');
+                    textField.remove();
+                    triggerToast("Link copied to clipboard successfully!");
+                } catch (err) {
+                    triggerToast("Failed to copy. Please write or copy manually.", "error");
+                }
+            };
+
+            const getCustomerShareUrl = () => {
+                return window.location.origin + window.location.pathname;
+            };
+
+            const getAdminShareUrl = () => {
+                return window.location.origin + window.location.pathname + "?admin=true";
+            };
+
+            const handleOrderSubmit = (e) => {
+                e.preventDefault();
+                if (!selectedProduct) return;
+
+                if (!orderForm.customerName.trim()) {
+                    triggerToast("Please provide your name to continue.", "error");
+                    return;
+                }
+
+                if (orderForm.deliveryType === "delivery" && !orderForm.location.trim()) {
+                    triggerToast("Please specify your delivery location.", "error");
+                    return;
+                }
+
+                const itemTotal = selectedProduct.price * orderForm.quantity;
+                const deliveryCharge = orderForm.deliveryType === "delivery" 
+                    ? (itemTotal >= company.freeDeliveryOver ? 0 : company.deliveryCharge) 
+                    : 0;
+                const grandTotal = itemTotal + deliveryCharge;
+
+                const whatsappMessage = 
+`*🆕 NEW ORDER FROM ${company.name.toUpperCase()} WEBSITE*
+-----------------------------------------
+👤 *Customer:* ${orderForm.customerName}
+
+*🛒 ORDER DETAILS:*
+• *Item:* ${selectedProduct.nameEnglish} (${selectedProduct.nameMalayalam})
+• *Qty:* ${orderForm.quantity} pcs
+• *Unit Price:* ${company.currencySymbol}${selectedProduct.price}
+• *Subtotal:* ${company.currencySymbol}${itemTotal}
+
+*📍 DELIVERY/COLLECTION DETAILS:*
+• *Mode:* ${orderForm.deliveryType === "delivery" ? "🚀 Home Delivery" : "🛍️ Store Pickup"}
+${orderForm.deliveryType === "delivery" ? `• *Location:* ${orderForm.location}` : ""}
+${orderForm.deliveryType === "delivery" && orderForm.landmark ? `• *Landmark:* ${orderForm.landmark}` : ""}
+• *Preferred Time:* ${orderForm.deliveryTime}
+${orderForm.notes ? `• *Notes:* "${orderForm.notes}"` : ""}
+
+-----------------------------------------
+💳 *BILL BREAKDOWN:*
+• Items Total: ${company.currencySymbol}${itemTotal}
+• Delivery Fee: ${company.currencySymbol}${deliveryCharge}
+*👉 GRAND TOTAL:* *${company.currencySymbol}${grandTotal}*
+-----------------------------------------
+_Sent via ${company.name} Interactive Web Portal. Please confirm my order!_`;
+
+                const cleanPhone = company.phone.replace(/[+\s-]/g, "");
+                const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(whatsappMessage)}`;
+                
+                triggerToast("Opening WhatsApp to complete your order...", "success");
+                window.open(waUrl, "_blank");
+            };
+
+            const handleLoginSubmit = (e) => {
+                e.preventDefault();
+                if (pinInput === "1234") {
+                    setIsAdmin(true);
+                    localStorage.setItem("eatsee_isAdmin", "true");
+                    setShowLoginModal(false);
+                    setPinInput("");
+                    setActiveTab("admin");
+                    setAdminCompany({...company});
+                    setAdminProducts([...products]);
+                    triggerToast("Logged in as Administrator successfully!");
+                } else {
+                    triggerToast("Incorrect Administrator PIN! Please try again.", "error");
+                }
+            };
+
+            const handleLogout = () => {
+                setIsAdmin(false);
+                localStorage.removeItem("eatsee_isAdmin");
+                setActiveTab("menu");
+                triggerToast("Logged out of Admin Portal.");
+            };
+
+            const handleSaveCompanyConfig = async (e) => {
+                e.preventDefault();
+                setCompany({ ...adminCompany });
+                
+                const { error } = await _supabase
+                    .from('company_config')
+                    .upsert({ id: 1, ...adminCompany });
+                
+                if (error) {
+                    triggerToast("Cloud sync failed: " + error.message, "error");
+                } else {
+                    triggerToast("Store configurations updated successfully!");
+                }
+            };
+
+            const handleLogoUpload = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.size > 1 * 1024 * 1024) { // 1MB limit for localStorage efficiency
+                        triggerToast("Logo file too large! Please use a smaller image (under 1MB).", "error");
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        setAdminCompany(prev => ({ ...prev, logoUrl: reader.result }));
+                        triggerToast("Logo uploaded successfully! Remember to save changes.");
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            
+            const handleNewProductImageUpload = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.size > 1 * 1024 * 1024) {
+                        triggerToast("Image file too large! Please use a smaller image (under 1MB).", "error");
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        setNewProductForm(prev => ({ ...prev, imageUrl: reader.result }));
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            const handleProductChange = (id, field, value) => {
+                const updated = adminProducts.map(p => {
+                    if (p.id === id) {
+                        return { ...p, [field]: value };
+                    }
+                    return p;
+                });
+                setAdminProducts(updated);
+            };
+
+            const handleSaveProducts = async () => {
+                setProducts([...adminProducts]);
+                
+                const { error } = await _supabase
+                    .from('products')
+                    .upsert(adminProducts);
+                
+                if (error) {
+                    triggerToast("Error syncing products: " + error.message, "error");
+                } else {
+                    triggerToast("Menu items saved successfully!");
+                }
+            };
+            
+            const handleCreateProduct = async (e) => {
+                e.preventDefault();
+                
+                if (!newProductForm.nameEnglish?.trim() || !newProductForm.nameMalayalam?.trim() || !newProductForm.price) {
+                    triggerToast("Please enter at least the Product Names and Price.", "error");
+                    return;
+                }
+                
+                const productToAdd = {
+                    nameEnglish: newProductForm.nameEnglish,
+                    nameMalayalam: newProductForm.nameMalayalam,
+                    price: Number(newProductForm.price),
+                    imageUrl: newProductForm.imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400",
+                    category: newProductForm.category || "General",
+                    preparationTime: newProductForm.preparationTime || "Not specified",
+                    deliveryDetails: newProductForm.deliveryDetails || "Standard",
+                    description: newProductForm.description || ""
+                };
+                
+                try {
+                    const { data, error } = await _supabase
+                        .from('products')
+                        .insert(productToAdd)
+                        .select()
+                        .single();
+
+                    if (error) {
+                        console.error("Supabase Insert Error:", error);
+                        // Try with snake_case if camelCase fails
+                        if (error.code === '42703' || error.message?.includes('column')) {
+                            const snakeProduct = {
+                                name_english: productToAdd.nameEnglish,
+                                name_malayalam: productToAdd.nameMalayalam,
+                                price: productToAdd.price,
+                                image_url: productToAdd.imageUrl,
+                                category: productToAdd.category,
+                                preparation_time: productToAdd.preparationTime,
+                                delivery_details: productToAdd.deliveryDetails,
+                                description: productToAdd.description
+                            };
+                            
+                            const { data: sData, error: sError } = await _supabase
+                                .from('products')
+                                .insert(snakeProduct)
+                                .select()
+                                .single();
+                                
+                            if (sError) {
+                                triggerToast("Failed to add product: " + sError.message, "error");
+                                return;
+                            }
+                            
+                            // Map snake_case back to camelCase for UI
+                            const mappedData = {
+                                id: sData.id,
+                                nameEnglish: sData.name_english,
+                                nameMalayalam: sData.name_malayalam,
+                                price: sData.price,
+                                imageUrl: sData.image_url,
+                                category: sData.category,
+                                preparationTime: sData.preparation_time,
+                                deliveryDetails: sData.delivery_details,
+                                description: sData.description,
+                                created_at: sData.created_at
+                            };
+                            
+                            setProducts([mappedData, ...products]);
+                            setAdminProducts([mappedData, ...adminProducts]);
+                        } else {
+                            triggerToast("Failed to add product: " + error.message, "error");
+                            return;
+                        }
+                    } else {
+                        setProducts([data, ...products]);
+                        setAdminProducts([data, ...adminProducts]);
+                    }
+                    
+                    setShowAddProductModal(false);
+                    setNewProductForm({
+                        nameEnglish: "",
+                        nameMalayalam: "",
+                        price: "",
+                        imageUrl: "",
+                        category: "",
+                        preparationTime: "",
+                        deliveryDetails: "",
+                        description: ""
+                    });
+                    triggerToast("Product added to menu successfully!");
+                } catch (err) {
+                    triggerToast("Error: " + err.message, "error");
+                }
+            };
+
+            const handleAddNewProduct = () => {
+                setShowAddProductModal(true);
+            };
+
+            const handleDeleteProduct = async (id) => {
+                const filteredAdmin = adminProducts.filter(p => p.id !== id);
+                const filteredProds = products.filter(p => p.id !== id);
+                setAdminProducts(filteredAdmin);
+                setProducts(filteredProds);
+                if (editingProduct?.id === id) setEditingProduct(null);
+
+                const { error } = await _supabase
+                    .from('products')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    triggerToast("Error deleting from cloud: " + error.message, "error");
+                } else {
+                    triggerToast("Item removed from Menu.");
+                }
+            };
+
+            const confirmResetToDefaults = () => {
+                setCompany(DEFAULT_COMPANY_DETAILS);
+                setAdminCompany(DEFAULT_COMPANY_DETAILS);
+                setProducts(DEFAULT_PRODUCTS);
+                setAdminProducts(DEFAULT_PRODUCTS);
+                localStorage.clear();
+                setShowResetConfirm(false);
+                triggerToast("Restored original credentials and presets!");
+            };
+
+            const exportConfig = () => {
+                const configStr = JSON.stringify({ company, products }, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(configStr);
+                const exportFileDefaultName = 'eatsee_config.json';
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+                triggerToast("Configuration JSON exported.");
+            };
+
+            const importConfig = (e) => {
+                const fileReader = new FileReader();
+                fileReader.readAsText(e.target.files[0], "UTF-8");
+                fileReader.onload = (event) => {
+                    try {
+                        const parsed = JSON.parse(event.target.result);
+                        if (parsed.company && parsed.products) {
+                            setCompany(parsed.company);
+                            setAdminCompany(parsed.company);
+                            setProducts(parsed.products);
+                            setAdminProducts(parsed.products);
+                            triggerToast("Configuration imported successfully!");
+                        } else {
+                            triggerToast("Invalid configurations detected.", "error");
+                        }
+                    } catch (err) {
+                        triggerToast("Failed to parse JSON configuration.", "error");
+                    }
+                };
+            };
+
+            return (
+                <div className="flex-grow flex flex-col justify-between">
+                    
+                    {/* Toast Notification */}
+                    {toast && (
+                        <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-2xl transition-all flex items-center gap-3 border ${
+                            toast.type === 'error' ? 'bg-red-900/90 border-red-500 text-red-200' : 'bg-emerald-950/95 border-emerald-500 text-emerald-200'
+                        }`}>
+                            <i className={toast.type === 'error' ? "fa-solid fa-circle-exclamation text-xl text-red-400" : "fa-solid fa-circle-check text-xl text-emerald-400"}></i>
+                            <span className="font-medium">{toast.message}</span>
+                        </div>
+                    )}
+
+                    {/* Header */}
+                    <header className="sticky top-0 z-30 bg-[#0c2d20]/90 border-b border-emerald-900/60 shadow-lg px-2 sm:px-4 py-3 sm:py-4 backdrop-blur-md">
+                        <div className="max-w-6xl mx-auto flex items-center justify-between gap-2">
+                            
+                            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                                <div className="bg-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-full flex items-center justify-center shadow max-h-10 sm:max-h-12 overflow-hidden">
+                                    {company.logoUrl ? (
+                                        <img 
+                                            src={company.logoUrl} 
+                                            alt={company.name} 
+                                            className="h-6 sm:h-8 w-auto object-contain"
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.style.display = 'none';
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className="bg-[#0c2d20] text-white rounded-full w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center font-black text-[10px] sm:text-xs">
+                                            {company.name.charAt(0)}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="hidden lg:block">
+                                    <span className="text-[10px] text-emerald-400/80 block font-bold tracking-widest uppercase leading-none mb-0.5">{company.tagline}</span>
+                                    <span className="text-[10px] text-slate-300 block leading-none">{company.address}</span>
+                                </div>
+                            </div>
+
+                            {/* Slogan - Hidden on very small, visible on sm and up */}
+                            <div className="hidden sm:block text-center flex-grow">
+                                <h1 className="font-bold text-lg md:text-xl text-white tracking-wide malayalam-title font-serif truncate">{company.sloganMalayalam}</h1>
+                            </div>
+
+                            {/* Navigation Tabs */}
+                            <div className="flex items-center gap-1.5 sm:gap-2">
+                                <button 
+                                    onClick={() => setActiveTab("menu")}
+                                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
+                                        activeTab === "menu" 
+                                            ? "bg-white text-[#0c2d20] shadow-md" 
+                                            : "hover:bg-emerald-900/50 text-emerald-200"
+                                    }`}
+                                >
+                                    <i className="fa-solid fa-utensils sm:mr-2"></i> <span className="hidden xs:inline">Menu</span>
+                                </button>
+                                {isAdmin ? (
+                                    <div className="flex items-center gap-1 bg-emerald-950/60 p-0.5 sm:p-1 rounded-full">
+                                        <button 
+                                            onClick={() => {
+                                                setActiveTab("admin");
+                                                setAdminCompany({...company});
+                                                setAdminProducts([...products]);
+                                            }}
+                                            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
+                                                activeTab === "admin" 
+                                                    ? "bg-amber-400 text-amber-950 shadow-md" 
+                                                    : "hover:bg-emerald-900/50 text-amber-200/80"
+                                            }`}
+                                        >
+                                            <i className="fa-solid fa-sliders sm:mr-2"></i> <span className="hidden xs:inline">Customize</span>
+                                        </button>
+                                        <button 
+                                            onClick={handleLogout}
+                                            title="Logout"
+                                            className="px-2 py-1.5 sm:py-2 rounded-full text-slate-400 hover:text-red-400 transition-all text-xs sm:text-sm"
+                                        >
+                                            <i className="fa-solid fa-power-off"></i>
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button 
+                                        onClick={() => setShowLoginModal(true)}
+                                        className="px-3 sm:px-4 py-1.5 sm:py-2 bg-emerald-900/60 text-emerald-200 hover:bg-emerald-800/80 border border-emerald-800 rounded-full text-xs sm:text-sm font-semibold transition-all whitespace-nowrap"
+                                    >
+                                        <i className="fa-solid fa-lock sm:mr-2"></i> <span className="hidden xs:inline">Login</span>
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Quick Info Bar */}
+                    <section className="bg-[#092218] py-2 px-4 text-center text-[10px] sm:text-xs md:text-sm text-emerald-200 border-b border-emerald-900/40">
+                        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-1.5 sm:gap-2">
+                            <span className="opacity-80">📍 Omassery & Nearby Areas • Hot & Fresh Delivery</span>
+                            <div className="flex items-center gap-3 sm:gap-4">
+                                <a href={`https://wa.me/${company.phone.replace(/[+\s-]/g, "")}`} target="_blank" className="hover:underline flex items-center gap-1 text-emerald-300 font-semibold">
+                                    <i className="fa-brands fa-whatsapp text-emerald-400 text-sm"></i> {company.phone}
+                                </a>
+                                <button 
+                                    onClick={() => setShowFlyerModal(true)} 
+                                    className="bg-emerald-900/50 px-2.5 py-0.5 rounded-full text-[10px] text-emerald-300 border border-emerald-700 hover:bg-emerald-800 transition-all"
+                                >
+                                    <i className="fa-regular fa-image mr-1"></i> <span className="xs:inline">Flyer</span>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Main Workspace */}
+                    <main className="flex-grow max-w-6xl w-full mx-auto px-3 sm:px-6 py-6 sm:py-10">
+                        {activeTab === "menu" ? (
+                            <div className="flex flex-col items-center">
+                                {/* Malayalam Poster Header Slogan */}
+                                <div className="text-center mb-6 sm:mb-10 mt-2 sm:mt-4">
+                                    <h2 className="text-2xl xs:text-3xl md:text-5xl font-bold text-white tracking-wide mb-4 sm:mb-6 malayalam-title leading-snug px-2">
+                                        {company.sloganMalayalam}
+                                    </h2>
+                                    {/* White Badge "Our Menu" exactly styled like the poster image_82eb2b.jpg */}
+                                    <div className="bg-white text-[#0c2d20] text-sm sm:text-lg font-bold px-8 sm:px-12 py-1.5 sm:py-2.5 rounded-full inline-block shadow-xl border border-slate-100/10 uppercase tracking-widest">
+                                        Our Menu
+                                    </div>
+                                </div>
+
+                                {/* Menu Items Grid */}
+                                <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-10 w-full max-w-5xl mt-6">
+                                    {products.map((item) => (
+                                        <div 
+                                            key={item.id}
+                                            onClick={() => {
+                                                setSelectedProduct(item);
+                                                setOrderForm(prev => ({ ...prev, quantity: 10 })); 
+                                            }}
+                                            className="poster-card text-center p-5 sm:p-8 flex flex-col items-center justify-between relative overflow-hidden cursor-pointer shadow-lg active:scale-95 transition-transform"
+                                        >
+                                            {/* Poster card subtle double background wave design overlay */}
+                                            <div className="absolute inset-0 opacity-10 pointer-events-none">
+                                                <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                                    <path d="M0,40 Q25,20 50,40 T100,40 L100,100 L0,100 Z" fill="#0c2d20" />
+                                                    <path d="M0,50 Q25,35 50,55 T100,45" fill="none" stroke="#0c2d20" strokeWidth="1" />
+                                                    <path d="M0,60 Q25,45 50,65 T100,55" fill="none" stroke="#0c2d20" strokeWidth="1" />
+                                                </svg>
+                                            </div>
+
+                                            {/* Circular Plate Layout frame */}
+                                            <div className="relative w-36 h-36 sm:w-48 sm:h-48 mb-4 sm:mb-6 rounded-full p-2 bg-gradient-to-tr from-emerald-50 to-white shadow-inner flex items-center justify-center z-10">
+                                                <div className="w-32 h-32 sm:w-44 sm:h-44 rounded-full overflow-hidden border-2 border-dashed border-emerald-900/10 shadow-md">
+                                                    <img 
+                                                        src={item.imageUrl} 
+                                                        alt={item.nameEnglish}
+                                                        onError={(e) => {
+                                                            e.target.onerror = null;
+                                                            e.target.src = `https://placehold.co/400x400/0f382a/ffffff?text=${item.nameEnglish}`;
+                                                        }}
+                                                        className="w-full h-full object-cover rounded-full"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Malayalam Name from image_82eb2b.jpg */}
+                                            <div className="z-10 mb-4 sm:mb-6">
+                                                <h3 className="text-2xl sm:text-3xl font-bold text-[#0c2d20] malayalam-title leading-tight mb-1 sm:mb-2 font-serif">
+                                                    {item.nameMalayalam}
+                                                </h3>
+                                                <span className="text-[10px] sm:text-xs uppercase tracking-widest font-extrabold text-emerald-800/60 block">
+                                                    {item.nameEnglish}
+                                                </span>
+                                            </div>
+
+                                            {/* Dark Green Price Badge exactly like image_82eb2b.jpg */}
+                                            <div className="z-10 bg-[#0c2d20] text-white font-bold text-base sm:text-xl px-8 sm:px-10 py-1.5 sm:py-2 rounded-full shadow-lg min-w-[100px] border border-emerald-950">
+                                                {company.currencySymbol}{item.price}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {products.length === 0 && (
+                                    <div className="text-center py-20 bg-emerald-950/30 rounded-3xl border border-dashed border-emerald-800/40 w-full">
+                                        <i className="fa-solid fa-basket-shopping text-5xl text-emerald-700 mb-4"></i>
+                                        <h3 className="text-xl font-bold">No Menu Items Configured</h3>
+                                        <p className="text-emerald-300/60 mt-2">Go to the Customize Panel to add product details.</p>
+                                        {!isAdmin && (
+                                            <button 
+                                                onClick={() => setShowLoginModal(true)}
+                                                className="mt-4 bg-amber-400 hover:bg-amber-500 text-[#0c2d20] text-xs font-bold px-4 py-2 rounded-xl transition-all"
+                                            >
+                                                <i className="fa-solid fa-lock mr-1.5"></i> Access Admin Panel
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="bg-[#0f382a]/50 rounded-3xl p-6 border border-emerald-900 shadow-2xl backdrop-blur-sm">
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-emerald-900/80 pb-6 mb-6 gap-4">
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-amber-400 flex items-center gap-2">
+                                            <i className="fa-solid fa-screwdriver-wrench"></i> Configure Store
+                                        </h2>
+                                        <p className="text-sm text-emerald-200/70 mt-1">Live updates of the logo, brand names, and menu card attributes.</p>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        <button 
+                                            onClick={exportConfig} 
+                                            className="bg-emerald-800 text-white hover:bg-emerald-700 text-xs font-semibold px-4 py-2 rounded-xl border border-emerald-600 transition-all flex items-center gap-1.5"
+                                        >
+                                            <i className="fa-solid fa-download"></i> Export JSON
+                                        </button>
+                                        <label className="bg-emerald-800 text-white hover:bg-emerald-700 text-xs font-semibold px-4 py-2 rounded-xl border border-emerald-600 cursor-pointer transition-all flex items-center gap-1.5">
+                                            <i className="fa-solid fa-upload"></i> Import JSON
+                                            <input type="file" accept=".json" onChange={importConfig} className="hidden" />
+                                        </label>
+                                        <button 
+                                            onClick={() => setShowResetConfirm(true)} 
+                                            className="bg-rose-950 text-rose-300 hover:bg-rose-900 text-xs font-semibold px-4 py-2 rounded-xl border border-rose-800 transition-all flex items-center gap-1.5"
+                                        >
+                                            <i className="fa-solid fa-rotate-left"></i> Reset Defaults
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Link Generator & Sharer Console */}
+                                <div className="mb-8 p-5 rounded-2xl bg-emerald-950/80 border border-amber-500/30 shadow-md">
+                                    <h3 className="text-sm font-black text-amber-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                        <i className="fa-solid fa-share-nodes"></i> Shareable Storefront Links
+                                    </h3>
+                                    <p className="text-xs text-emerald-200/80 mb-4">
+                                        Send the Customer Link to your users. They will only see the menu and have no access to your administrative panel. Keep the private Admin Link for your own use.
+                                    </p>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Customer Link Box */}
+                                        <div className="bg-[#0c2d20] p-3 rounded-xl border border-emerald-900">
+                                            <span className="block text-[10px] text-emerald-400 font-extrabold uppercase mb-1">Customer Link (Share on WhatsApp)</span>
+                                            <div className="flex gap-2">
+                                                <input 
+                                                    type="text" 
+                                                    readOnly 
+                                                    value={getCustomerShareUrl()} 
+                                                    className="flex-grow bg-[#0a261a] text-emerald-300 text-xs px-3 py-2 rounded-lg border border-emerald-800/50 focus:outline-none focus:border-emerald-500/70"
+                                                />
+                                                <button 
+                                                    onClick={() => copyLinkToClipboard(getCustomerShareUrl())} 
+                                                    className="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg transition-all flex items-center gap-1.5"
+                                                >
+                                                    <i className="fa-regular fa-copy"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Admin Link Box */}
+                                        <div className="bg-[#0c2d20] p-3 rounded-xl border border-amber-700/50">
+                                            <span className="block text-[10px] text-amber-400 font-extrabold uppercase mb-1">Admin Link (Keep Private)</span>
+                                            <div className="flex gap-2">
+                                                <input 
+                                                    type="text" 
+                                                    readOnly 
+                                                    value={getAdminShareUrl()} 
+                                                    className="flex-grow bg-[#0a261a] text-amber-300 text-xs px-3 py-2 rounded-lg border border-amber-700/50 focus:outline-none"
+                                                />
+                                                <button 
+                                                    onClick={() => copyLinkToClipboard(getAdminShareUrl())} 
+                                                    className="bg-amber-700 hover:bg-amber-600 text-white text-xs px-3 py-2 rounded-lg transition-all flex items-center gap-1.5"
+                                                >
+                                                    <i className="fa-regular fa-copy"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                                    {/* Company Configuration - Left Side */}
+                                    <div className="lg:col-span-5 space-y-6">
+                                        <div className="bg-[#0c2d20]/60 rounded-2xl p-5 border border-emerald-800/50">
+                                            <h3 className="text-amber-400 font-bold text-base mb-4 flex items-center gap-2">
+                                                <i className="fa-solid fa-store"></i> Brand Details
+                                            </h3>
+                                            <form onSubmit={handleSaveCompanyConfig} className="space-y-4">
+                                                {/* Logo Upload & Preview */}
+                                                <div className="flex flex-col sm:flex-row gap-4 items-start">
+                                                    <div className="flex flex-col items-center gap-2">
+                                                        <div className="bg-white p-2 rounded-xl shadow-md w-24 h-24 flex items-center justify-center overflow-hidden">
+                                                            {adminCompany.logoUrl ? (
+                                                                <img 
+                                                                    src={adminCompany.logoUrl} 
+                                                                    alt="Logo Preview" 
+                                                                    className="object-contain w-full h-full"
+                                                                />
+                                                            ) : (
+                                                                <div className="bg-[#0c2d20] text-white text-3xl rounded-full w-14 h-14 flex items-center justify-center">
+                                                                    <i className="fa-solid fa-utensils"></i>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <label className="text-center bg-emerald-800 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-full cursor-pointer transition-all border border-emerald-600">
+                                                            <i className="fa-regular fa-image mr-1"></i> Upload Logo
+                                                            <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                                                        </label>
+                                                    </div>
+                                                    <div className="flex-grow space-y-3">
+                                                        <div>
+                                                            <label className="text-emerald-300 text-xs font-semibold mb-1 block">Store Name</label>
+                                                            <input 
+                                                                type="text" 
+                                                                value={adminCompany.name} 
+                                                                onChange={(e) => setAdminCompany({...adminCompany, name: e.target.value})} 
+                                                                className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-sm focus:outline-none focus:border-emerald-500/70"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-emerald-300 text-xs font-semibold mb-1 block">Tagline</label>
+                                                            <input 
+                                                                type="text" 
+                                                                value={adminCompany.tagline} 
+                                                                onChange={(e) => setAdminCompany({...adminCompany, tagline: e.target.value})} 
+                                                                className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-sm focus:outline-none focus:border-emerald-500/70"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-emerald-300 text-xs font-semibold mb-1 block">Malayalam Slogan</label>
+                                                            <input 
+                                                                type="text" 
+                                                                value={adminCompany.sloganMalayalam} 
+                                                                onChange={(e) => setAdminCompany({...adminCompany, sloganMalayalam: e.target.value})} 
+                                                                className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-sm focus:outline-none focus:border-emerald-500/70"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="text-emerald-300 text-xs font-semibold mb-1 block">Address</label>
+                                                        <input 
+                                                            type="text" 
+                                                            value={adminCompany.address} 
+                                                            onChange={(e) => setAdminCompany({...adminCompany, address: e.target.value})} 
+                                                            className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-sm focus:outline-none focus:border-emerald-500/70"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-emerald-300 text-xs font-semibold mb-1 block">Phone (WhatsApp)</label>
+                                                        <input 
+                                                            type="text" 
+                                                            value={adminCompany.phone} 
+                                                            onChange={(e) => setAdminCompany({...adminCompany, phone: e.target.value})} 
+                                                            className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-sm focus:outline-none focus:border-emerald-500/70"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-3 gap-3">
+                                                    <div>
+                                                        <label className="text-emerald-300 text-xs font-semibold mb-1 block">Currency</label>
+                                                        <input 
+                                                            type="text" 
+                                                            value={adminCompany.currencySymbol} 
+                                                            onChange={(e) => setAdminCompany({...adminCompany, currencySymbol: e.target.value})} 
+                                                            className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-sm focus:outline-none focus:border-emerald-500/70"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-emerald-300 text-xs font-semibold mb-1 block">Delivery Charge</label>
+                                                        <input 
+                                                            type="number" 
+                                                            value={adminCompany.deliveryCharge} 
+                                                            onChange={(e) => setAdminCompany({...adminCompany, deliveryCharge: Number(e.target.value)})} 
+                                                            className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-sm focus:outline-none focus:border-emerald-500/70"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-emerald-300 text-xs font-semibold mb-1 block">Free Above</label>
+                                                        <input 
+                                                            type="number" 
+                                                            value={adminCompany.freeDeliveryOver} 
+                                                            onChange={(e) => setAdminCompany({...adminCompany, freeDeliveryOver: Number(e.target.value)})} 
+                                                            className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-sm focus:outline-none focus:border-emerald-500/70"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <button 
+                                                    type="submit" 
+                                                    className="w-full bg-amber-400 hover:bg-amber-500 text-amber-950 text-sm font-bold py-3 rounded-xl transition-all shadow-lg"
+                                                >
+                                                    Save Store Details
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    {/* Products Configuration - Right Side */}
+                                    <div className="lg:col-span-7 space-y-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="text-amber-400 font-bold text-base flex items-center gap-2">
+                                                <i className="fa-solid fa-burger"></i> Manage Menu Poster
+                                            </h3>
+                                            <button 
+                                                onClick={handleAddNewProduct} 
+                                                className="bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all flex items-center gap-1.5"
+                                            >
+                                                <i className="fa-solid fa-plus"></i> Add New Item
+                                            </button>
+                                        </div>
+
+                                        <div className="space-y-4 max-h-[60vh] overflow-y-auto custom-scroll pr-1">
+                                            {adminProducts.map((item, index) => (
+                                                <div key={item.id} className="bg-[#0c2d20]/80 rounded-2xl p-5 border border-emerald-800/40 shadow-lg">
+                                                    <div className="flex flex-col sm:flex-row gap-4">
+                                                        <div className="flex-shrink-0">
+                                                            <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-white">
+                                                                <img 
+                                                                    src={item.imageUrl} 
+                                                                    alt={item.nameEnglish} 
+                                                                    className="w-full h-full object-cover"
+                                                                    onError={(e) => {
+                                                                        e.target.onerror = null;
+                                                                        e.target.src = `https://placehold.co/80x80/0f382a/ffffff?text=${item.nameEnglish.charAt(0)}`;
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div className="flex-grow space-y-3">
+                                                            <div className="flex items-center justify-between gap-3">
+                                                                <h4 className="font-bold text-white text-base">{item.nameEnglish} • {item.nameMalayalam}</h4>
+                                                                <div className="flex items-center gap-2">
+                                                                    <button 
+                                                                        onClick={() => setEditingProduct(editingProduct?.id === item.id ? null : item)}
+                                                                        className={`text-xs px-2.5 py-1 rounded-full font-semibold transition-all ${
+                                                                            editingProduct?.id === item.id 
+                                                                                ? "bg-amber-400 text-amber-950" 
+                                                                                : "bg-emerald-800 hover:bg-emerald-700 text-emerald-100"
+                                                                        }`}
+                                                                    >
+                                                                        {editingProduct?.id === item.id ? <><i className="fa-solid fa-check mr-1"></i> Done</> : <><i className="fa-solid fa-pen mr-1"></i> Edit</>}
+                                                                    </button>
+                                                                    <button 
+                                                                        onClick={() => handleDeleteProduct(item.id)} 
+                                                                        className="text-xs px-2 py-1 rounded-full font-semibold bg-rose-900/60 hover:bg-rose-900 text-rose-300 transition-all"
+                                                                    >
+                                                                        <i className="fa-solid fa-trash"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+                                                            {editingProduct?.id === item.id && (
+                                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-emerald-800/50 mt-3">
+                                                                    <div className="sm:col-span-2">
+                                                                        <label className="text-emerald-300 text-[10px] font-semibold mb-1 block uppercase tracking-wider">Image URL</label>
+                                                                        <input 
+                                                                            type="text" 
+                                                                            value={item.imageUrl} 
+                                                                            onChange={(e) => handleProductChange(item.id, 'imageUrl', e.target.value)} 
+                                                                            className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-xs focus:outline-none focus:border-emerald-500/70"
+                                                                        />
+                                                                    </div>
+                                                                    <div>
+                                                                        <label className="text-emerald-300 text-[10px] font-semibold mb-1 block uppercase tracking-wider">Name (English)</label>
+                                                                        <input 
+                                                                            type="text" 
+                                                                            value={item.nameEnglish} 
+                                                                            onChange={(e) => handleProductChange(item.id, 'nameEnglish', e.target.value)} 
+                                                                            className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-xs focus:outline-none focus:border-emerald-500/70"
+                                                                        />
+                                                                    </div>
+                                                                    <div>
+                                                                        <label className="text-emerald-300 text-[10px] font-semibold mb-1 block uppercase tracking-wider">Name (Malayalam)</label>
+                                                                        <input 
+                                                                            type="text" 
+                                                                            value={item.nameMalayalam} 
+                                                                            onChange={(e) => handleProductChange(item.id, 'nameMalayalam', e.target.value)} 
+                                                                            className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-xs focus:outline-none focus:border-emerald-500/70"
+                                                                        />
+                                                                    </div>
+                                                                    <div>
+                                                                        <label className="text-emerald-300 text-[10px] font-semibold mb-1 block uppercase tracking-wider">Price</label>
+                                                                        <input 
+                                                                            type="number" 
+                                                                            value={item.price} 
+                                                                            onChange={(e) => handleProductChange(item.id, 'price', Number(e.target.value))} 
+                                                                            className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-xs focus:outline-none focus:border-emerald-500/70"
+                                                                        />
+                                                                    </div>
+                                                                    <div>
+                                                                        <label className="text-emerald-300 text-[10px] font-semibold mb-1 block uppercase tracking-wider">Category</label>
+                                                                        <input 
+                                                                            type="text" 
+                                                                            value={item.category} 
+                                                                            onChange={(e) => handleProductChange(item.id, 'category', e.target.value)} 
+                                                                            className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-xs focus:outline-none focus:border-emerald-500/70"
+                                                                        />
+                                                                    </div>
+                                                                    <div className="sm:col-span-2">
+                                                                        <label className="text-emerald-300 text-[10px] font-semibold mb-1 block uppercase tracking-wider">Description</label>
+                                                                        <textarea 
+                                                                            value={item.description} 
+                                                                            onChange={(e) => handleProductChange(item.id, 'description', e.target.value)} 
+                                                                            rows={2}
+                                                                            className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-xs focus:outline-none focus:border-emerald-500/70"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <button 
+                                            onClick={handleSaveProducts} 
+                                            className="w-full bg-emerald-700 hover:bg-emerald-600 text-white text-sm font-bold py-3 rounded-xl transition-all shadow-lg"
+                                        >
+                                            <i className="fa-solid fa-cloud-upload-alt mr-2"></i> Save & Apply Changes to Poster
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </main>
+
+                    {/* Order Modal */}
+                    {selectedProduct && (
+                        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                            <div className="bg-[#0c2d20] rounded-3xl p-6 sm:p-8 max-w-md w-full border border-emerald-800 shadow-2xl">
+                                <div className="flex items-start justify-between mb-6">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-16 h-16 rounded-full overflow-hidden bg-white shadow-lg border-2 border-emerald-900/50">
+                                            <img 
+                                                src={selectedProduct.imageUrl} 
+                                                alt={selectedProduct.nameEnglish} 
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = `https://placehold.co/64x64/0f382a/ffffff?text=${selectedProduct.nameEnglish.charAt(0)}`;
+                                                }}
+                                            />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-bold text-white">{selectedProduct.nameEnglish}</h3>
+                                            <p className="text-sm text-emerald-400 font-medium">{selectedProduct.nameMalayalam}</p>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        onClick={() => setSelectedProduct(null)} 
+                                        className="text-emerald-400 hover:text-emerald-200 transition-all text-xl"
+                                    >
+                                        <i className="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                                
+                                <form onSubmit={handleOrderSubmit} className="space-y-4">
+                                    <div>
+                                        <label className="text-emerald-300 text-xs font-semibold mb-1 block uppercase tracking-wider">Your Name</label>
+                                        <input 
+                                            type="text" 
+                                            required 
+                                            value={orderForm.customerName}
+                                            onChange={(e) => setOrderForm({...orderForm, customerName: e.target.value})}
+                                            className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-sm focus:outline-none focus:border-emerald-500/70"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-emerald-300 text-xs font-semibold mb-1 block uppercase tracking-wider">Quantity</label>
+                                            <div className="flex items-center gap-2 bg-[#0a261a] border border-emerald-800/50 rounded-lg px-3 py-2">
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => setOrderForm({...orderForm, quantity: Math.max(1, orderForm.quantity - 1)})}
+                                                    className="text-emerald-400 hover:text-emerald-200 text-lg"
+                                                >
+                                                    <i className="fa-solid fa-minus"></i>
+                                                </button>
+                                                <input 
+                                                    type="number" 
+                                                    value={orderForm.quantity}
+                                                    onChange={(e) => setOrderForm({...orderForm, quantity: Math.max(1, Number(e.target.value) || 1)})}
+                                                    className="w-full bg-transparent text-white text-center font-bold border-none outline-none"
+                                                />
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => setOrderForm({...orderForm, quantity: orderForm.quantity + 1})}
+                                                    className="text-emerald-400 hover:text-emerald-200 text-lg"
+                                                >
+                                                    <i className="fa-solid fa-plus"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="text-emerald-300 text-xs font-semibold mb-1 block uppercase tracking-wider">Total</label>
+                                            <div className="bg-amber-400 text-amber-950 px-4 py-2 rounded-lg font-bold text-center text-lg">
+                                                {company.currencySymbol}{selectedProduct.price * orderForm.quantity}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-emerald-300 text-xs font-semibold mb-2 block uppercase tracking-wider">Delivery / Pickup</label>
+                                        <div className="flex gap-2 bg-[#0a261a] rounded-lg p-1 border border-emerald-800/50">
+                                            <button 
+                                                type="button"
+                                                onClick={() => setOrderForm({...orderForm, deliveryType: 'delivery'})}
+                                                className={`flex-1 py-2 rounded-md text-xs font-semibold transition-all ${
+                                                    orderForm.deliveryType === 'delivery' 
+                                                        ? 'bg-emerald-700 text-white' 
+                                                        : 'text-emerald-400 hover:text-emerald-200'
+                                                }`}
+                                            >
+                                                <i className="fa-solid fa-motorcycle mr-1"></i> Home Delivery
+                                            </button>
+                                            <button 
+                                                type="button"
+                                                onClick={() => setOrderForm({...orderForm, deliveryType: 'pickup'})}
+                                                className={`flex-1 py-2 rounded-md text-xs font-semibold transition-all ${
+                                                    orderForm.deliveryType === 'pickup' 
+                                                        ? 'bg-emerald-700 text-white' 
+                                                        : 'text-emerald-400 hover:text-emerald-200'
+                                                }`}
+                                            >
+                                                <i className="fa-solid fa-store mr-1"></i> Store Pickup
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {orderForm.deliveryType === 'delivery' && (
+                                        <>
+                                            <div>
+                                                <label className="text-emerald-300 text-xs font-semibold mb-1 block uppercase tracking-wider">Delivery Location</label>
+                                                <input 
+                                                    type="text" 
+                                                    required
+                                                    value={orderForm.location}
+                                                    onChange={(e) => setOrderForm({...orderForm, location: e.target.value})}
+                                                    className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-sm focus:outline-none focus:border-emerald-500/70"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-emerald-300 text-xs font-semibold mb-1 block uppercase tracking-wider">Landmark (Optional)</label>
+                                                <input 
+                                                    type="text" 
+                                                    value={orderForm.landmark}
+                                                    onChange={(e) => setOrderForm({...orderForm, landmark: e.target.value})}
+                                                    className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-sm focus:outline-none focus:border-emerald-500/70"
+                                                />
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <div>
+                                        <label className="text-emerald-300 text-xs font-semibold mb-1 block uppercase tracking-wider">Preferred Time</label>
+                                        <select 
+                                            value={orderForm.deliveryTime}
+                                            onChange={(e) => setOrderForm({...orderForm, deliveryTime: e.target.value})}
+                                            className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-sm focus:outline-none focus:border-emerald-500/70"
+                                        >
+                                            <option value="ASAP">As Soon As Possible</option>
+                                            <option value="30 mins">In 30 Minutes</option>
+                                            <option value="1 hour">In 1 Hour</option>
+                                            <option value="2 hours">In 2 Hours</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-emerald-300 text-xs font-semibold mb-1 block uppercase tracking-wider">Notes (Optional)</label>
+                                        <textarea 
+                                            value={orderForm.notes}
+                                            onChange={(e) => setOrderForm({...orderForm, notes: e.target.value})}
+                                            rows={2}
+                                            className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-sm focus:outline-none focus:border-emerald-500/70"
+                                        ></textarea>
+                                    </div>
+
+                                    <button 
+                                        type="submit"
+                                        className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-base"
+                                    >
+                                        <i className="fa-brands fa-whatsapp"></i> Send Order via WhatsApp
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Login Modal */}
+                    {showLoginModal && (
+                        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                            <div className="bg-[#0c2d20] rounded-3xl p-8 max-w-sm w-full border border-emerald-800 shadow-2xl text-center">
+                                <i className="fa-solid fa-lock text-4xl text-emerald-500 mb-4"></i>
+                                <h3 className="text-xl font-bold text-white mb-2">Admin Login</h3>
+                                <p className="text-emerald-300/70 text-sm mb-6">Enter your administrator PIN to access the customization panel.</p>
+                                
+                                <form onSubmit={handleLoginSubmit} className="space-y-4">
+                                    <input 
+                                        type="password" 
+                                        placeholder="Enter PIN" 
+                                        value={pinInput}
+                                        onChange={(e) => setPinInput(e.target.value)}
+                                        className="w-full bg-[#0a261a] text-center text-white text-xl font-bold tracking-widest px-4 py-3 rounded-xl border border-emerald-800/50 focus:outline-none focus:border-emerald-500/70"
+                                    />
+                                    <div className="flex gap-3">
+                                        <button 
+                                            type="button"
+                                            onClick={() => setShowLoginModal(false)}
+                                            className="flex-1 bg-emerald-900/60 hover:bg-emerald-800/80 text-white text-sm font-semibold py-2 rounded-xl transition-all"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button 
+                                            type="submit"
+                                            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold py-2 rounded-xl shadow-lg transition-all"
+                                        >
+                                            Login
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Add Product Modal */}
+                    {showAddProductModal && (
+                        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                            <div className="bg-[#0c2d20] rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-emerald-800 shadow-2xl">
+                                <div className="flex items-start justify-between mb-6">
+                                    <h3 className="text-xl font-bold text-white"><i className="fa-solid fa-plus-circle text-emerald-400 mr-2"></i> Add New Menu Item</h3>
+                                    <button 
+                                        onClick={() => setShowAddProductModal(false)} 
+                                        className="text-emerald-400 hover:text-emerald-200 transition-all text-xl"
+                                    >
+                                        <i className="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                                
+                                <form onSubmit={handleCreateProduct} className="space-y-4">
+                                    <div className="flex flex-col sm:flex-row gap-4 items-center">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <div className="w-24 h-24 rounded-full overflow-hidden bg-white shadow-lg border-2 border-emerald-900/50">
+                                                {newProductForm.imageUrl ? (
+                                                    <img 
+                                                        src={newProductForm.imageUrl} 
+                                                        alt="Preview" 
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-emerald-800/50">
+                                                        <i className="fa-solid fa-camera text-4xl"></i>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <label className="bg-emerald-800 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-full cursor-pointer transition-all border border-emerald-600">
+                                                <i className="fa-solid fa-upload mr-1"></i> Upload Image
+                                                <input type="file" accept="image/*" onChange={handleNewProductImageUpload} className="hidden" />
+                                            </label>
+                                        </div>
+                                        <div className="flex-grow space-y-3">
+                                            <div>
+                                                <label className="text-emerald-300 text-[10px] font-semibold mb-1 block uppercase tracking-wider">Image URL (Optional)</label>
+                                                <input 
+                                                    type="text" 
+                                                    value={newProductForm.imageUrl}
+                                                    onChange={(e) => setNewProductForm({...newProductForm, imageUrl: e.target.value})}
+                                                    className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-xs focus:outline-none focus:border-emerald-500/70"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-emerald-300 text-xs font-semibold mb-1 block uppercase tracking-wider">Name (English) *</label>
+                                            <input 
+                                                type="text" 
+                                                required
+                                                value={newProductForm.nameEnglish}
+                                                onChange={(e) => setNewProductForm({...newProductForm, nameEnglish: e.target.value})}
+                                                className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-sm focus:outline-none focus:border-emerald-500/70"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-emerald-300 text-xs font-semibold mb-1 block uppercase tracking-wider">Name (Malayalam) *</label>
+                                            <input 
+                                                type="text" 
+                                                required
+                                                value={newProductForm.nameMalayalam}
+                                                onChange={(e) => setNewProductForm({...newProductForm, nameMalayalam: e.target.value})}
+                                                className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-sm focus:outline-none focus:border-emerald-500/70"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-emerald-300 text-xs font-semibold mb-1 block uppercase tracking-wider">Price *</label>
+                                            <input 
+                                                type="number" 
+                                                required
+                                                value={newProductForm.price}
+                                                onChange={(e) => setNewProductForm({...newProductForm, price: e.target.value})}
+                                                className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-sm focus:outline-none focus:border-emerald-500/70"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-emerald-300 text-xs font-semibold mb-1 block uppercase tracking-wider">Category</label>
+                                            <input 
+                                                type="text" 
+                                                value={newProductForm.category}
+                                                onChange={(e) => setNewProductForm({...newProductForm, category: e.target.value})}
+                                                className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-sm focus:outline-none focus:border-emerald-500/70"
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="text-emerald-300 text-xs font-semibold mb-1 block uppercase tracking-wider">Description</label>
+                                        <textarea 
+                                            value={newProductForm.description}
+                                            onChange={(e) => setNewProductForm({...newProductForm, description: e.target.value})}
+                                            rows={2}
+                                            className="w-full bg-[#0a261a] text-slate-200 px-3 py-2 rounded-lg border border-emerald-800/50 text-sm focus:outline-none focus:border-emerald-500/70"
+                                        ></textarea>
+                                    </div>
+                                    
+                                    <div className="flex gap-3">
+                                        <button 
+                                            type="button"
+                                            onClick={() => {
+                                                setShowAddProductModal(false);
+                                                setNewProductForm({
+                                                    nameEnglish: "",
+                                                    nameMalayalam: "",
+                                                    price: "",
+                                                    imageUrl: "",
+                                                    category: "",
+                                                    preparationTime: "",
+                                                    deliveryDetails: "",
+                                                    description: ""
+                                                });
+                                            }}
+                                            className="flex-1 bg-emerald-900/60 hover:bg-emerald-800/80 text-white text-sm font-semibold py-2 rounded-xl transition-all"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button 
+                                            type="submit"
+                                            className="flex-1 bg-amber-400 hover:bg-amber-500 text-amber-950 text-sm font-bold py-2 rounded-xl shadow-lg transition-all"
+                                        >
+                                            <i className="fa-solid fa-plus"></i> Add Product to Menu
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Flyer Modal (Simple Preview) */}
+                    {showFlyerModal && (
+                        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                            <div className="bg-[#0c2d20] rounded-3xl p-8 max-w-2xl w-full border border-emerald-800 shadow-2xl">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-xl font-bold text-white"><i className="fa-solid fa-image text-emerald-400 mr-2"></i> Menu Preview</h3>
+                                    <button 
+                                        onClick={() => setShowFlyerModal(false)} 
+                                        className="text-emerald-400 hover:text-emerald-200 transition-all text-xl"
+                                    >
+                                        <i className="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                                <div className="bg-[#0a261a] rounded-2xl p-6 border border-emerald-800/50 text-center">
+                                    <p className="text-emerald-300/70">This is a simple preview of your menu items. To generate a full flyer, you can take a screenshot or export the data.</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Reset Confirmation Modal */}
+                    {showResetConfirm && (
+                        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                            <div className="bg-[#0c2d20] rounded-3xl p-8 max-w-sm w-full border border-rose-800/70 shadow-2xl text-center">
+                                <i className="fa-solid fa-triangle-exclamation text-4xl text-rose-400 mb-4"></i>
+                                <h3 className="text-xl font-bold text-white mb-2">Reset to Defaults?</h3>
+                                <p className="text-rose-300/70 text-sm mb-6">This will erase all your custom configurations and restore the original default data. This action cannot be undone.</p>
+                                
+                                <div className="flex gap-3">
+                                    <button 
+                                        onClick={() => setShowResetConfirm(false)}
+                                        className="flex-1 bg-emerald-900/60 hover:bg-emerald-800/80 text-white text-sm font-semibold py-2 rounded-xl transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button 
+                                        onClick={confirmResetToDefaults}
+                                        className="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold py-2 rounded-xl shadow-lg transition-all"
+                                    >
+                                        Yes, Reset Everything
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
